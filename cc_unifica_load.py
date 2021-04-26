@@ -12,12 +12,7 @@ class cc_unifica_load:
         self.ruta = ruta
     
     def make_DF(self):
-        
-        for file in gb.glob(self.ruta + self.nombre_archivo + '*.txt'):
-            filename = file
             
-        df = pd.read_csv(filename, delimiter='|', dtype=str, encoding='latin-1')
+        df = pd.read_csv(self.ruta + self.nombre_archivo + '2901.txt', delimiter='|', dtype=str, encoding='latin-1')
         
         return df
-    
-hola = cc_unifica_load(r'C:\Users\José Prieto\Documents\Bancaribe\Enero').make_DF()

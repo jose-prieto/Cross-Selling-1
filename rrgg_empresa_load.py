@@ -1,10 +1,10 @@
 import pandas as pd
 
-class rrgg_institucional_load:
+class rrgg_empresa_load:
     
     #Atributos
     ruta = ''
-    nombre_archivo = '\\rrgg institucional'
+    nombre_archivo = '\\rrgg empresa'
     
     #Constructor
     def __init__(self, ruta):
