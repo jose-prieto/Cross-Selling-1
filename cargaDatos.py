@@ -14,7 +14,7 @@ from cartera_cliente_load import cartera_cliente_load
 class cargaDatos:
     
     #Atributos
-    ruta = r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Enero'
+    ruta = r'C:\Users\José Prieto\Documents\Bancaribe\Enero'
     
     #Constructor
     def __init__(self):
@@ -72,17 +72,17 @@ class cargaDatos:
         cartera_cliente = cartera_cliente_load(self.ruta)
         return cartera_cliente.make_DF()
 
-cargaDatos = cargaDatos()
+#cargaDatos = cargaDatos()
 #pf_unifica = cargaDatos.pf_unifica()
 #cc_unifica = cargaDatos.cc_unifica()
 #ah_unifica = cargaDatos.ah_unifica()
 #rrgg_institucional = cargaDatos.rrgg_institucional()
 #rrgg_corporativo = cargaDatos.rrgg_corporativo()
 #rrgg_empresa = cargaDatos.rrgg_empresa()
-p2c = cargaDatos.P2C()#rrgg_empresa = cargaDatos.rrgg_empresa()
+#p2c = cargaDatos.P2C()#rrgg_empresa = cargaDatos.rrgg_empresa()
 #tdc_activas = cargaDatos.TDC_ACTIVAS()
 #tdc_madres = cargaDatos.MADRES_JURIDICAS()
 #reporte_pos = cargaDatos.reporte_pos()
 #ivr_conexion = cargaDatos.ivr_conexion()
 #rrgg_pyme = cargaDatos.rrgg_pyme()
-cartera_cliente = cargaDatos.cartera_cliente()
+#cartera_cliente = cargaDatos.cartera_cliente()
