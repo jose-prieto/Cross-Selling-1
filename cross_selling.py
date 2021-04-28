@@ -29,7 +29,7 @@ class cross_selling:
                                             'EDI', 'Finanzas Corporativas', 'Fideicomiso', 
                                             'Total Productos y Servicios de los Clientes del Grupo',
                                             'Productos y Servicios utilizados por el Grupo'])
-        self.MontosCliente = pd.DataFrame(columns = ['Mes', 'MIS', 'NOMBRE DEL CLIENTE', 'MIS GRUPO', 'GRUPO', 'VICEPRESIDENCIA', 
+        self.MontosCliente = pd.DataFrame(columns = ['Mes', 'MIS', 'RIF', 'NOMBRE DEL CLIENTE', 'MIS GRUPO', 'GRUPO', 'VICEPRESIDENCIA', 
                                                     'CARTERA', 'RESPONSABLE', 'Corriente/Ahorro', 'TDV', 'Convenio 20 / Convenio 1', 
                                                     'Cuenta en Euro', 'Mesa de Cambio Compra (USD)', 'Mesa de Cambio Venta (USD)', 
                                                     'Intervención Dólar Efectivo Venta', 'Intervención 20% Exportación Compra (USD)', 
@@ -42,8 +42,8 @@ class cross_selling:
         
     def make_Excel(self):
         writer = pd.ExcelWriter('hola.xlsx')
-        self.CSCliente.to_excel(writer, sheet_name='CS Clientes', startrow=7, startcol=1, index=False, freeze_panes=(8,6))
-        self.CSGrupo.to_excel(writer, sheet_name='CS Grupo', startrow=4, startcol=1, index=False, freeze_panes=(5,6))
-        self.MontosCliente.to_excel(writer, sheet_name='Montos por Producto Cliente', startrow=7, startcol=1, index=False, freeze_panes=(8,6))
+        self.CSCliente.to_excel(writer, sheet_name='CS Clientes', startrow=0, startcol=0, index=False, freeze_panes=(1,5))
+        self.CSGrupo.to_excel(writer, sheet_name='CS Grupo', startrow=0, startcol=0, index=False, freeze_panes=(1,5))
+        self.MontosCliente.to_excel(writer, sheet_name='Montos por Producto Cliente', startrow=0, startcol=0, index=False, freeze_panes=(0,5))
         writer.save()
         return self.CSCliente

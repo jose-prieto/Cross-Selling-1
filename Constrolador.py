@@ -1,26 +1,42 @@
-import pandas as pd
 from cargaDatos import cargaDatos
 from cross_selling import cross_selling
 
 class controlador:
     
+    
     def __init__(self):
         self.cargaDatos = cargaDatos()
         self.cartera = self.cargaDatos.cartera_cliente()
         self.crossSelling = cross_selling()
-    
-    #def buscar_rif(self, df, rif):
+        self.objetCartera = ''
         
-    def cruce_CSClientes_p2c(self):
-        p2c = self.cargaDatos.P2C()
-        csClientes = self.crossSelling.CSCliente
-        new_row = {'MIS': 1234, 'NOMBRE DEL CLIENTE': 'Jose Prieto'}
+    def crear_DF(self, fila):
+        new_row = {'MIS': self.objetCartera["MisCliente"].item(), 
+                    'RIF': self.objetCartera["CedulaCliente"].item(), 
+                    'NOMBRE DEL CLIENTE': self.objetCartera["NombreCliente"].item(),
+                    'P2C (Mensual)': fila["Monto de la operacion"]}
+        self.crossSelling.MontosCliente = self.crossSelling.MontosCliente.append(new_row, ignore_index=True)
+        new_row = {'MIS': self.objetCartera["MisCliente"].item(), 
+                    'RIF': self.objetCartera["CedulaCliente"].item(), 
+                    'NOMBRE DEL CLIENTE': self.objetCartera["NombreCliente"].item(),
+                    'P2C (Mensual)': 1}
         self.crossSelling.CSCliente = self.crossSelling.CSCliente.append(new_row, ignore_index=True)
-        self.crossSelling.make_Excel()
-        #df['Comedy_Score'].where(df['Rating_Score'] < 50)
         
-    def crear_Excel(self):
-        self.crossSelling.make_Excel()
+    def cruce_p2c(self):
+        p2c = self.cargaDatos.P2C()
+        print("Creando cruce cartera y p2c")
+        
+        for indice_fila, fila in p2c.iterrows():
+            if fila["RIF"] in list(self.cartera['CedulaCliente']):
+                self.objetCartera = self.cartera.loc[self.cartera['CedulaCliente'] == fila["RIF"]]
+                if (len(self.objetCartera) == 1):
+                    self.crear_DF(fila)
+                else:
+                    print(len(self.objetCartera))
+                    print(fila["RIF"])
+                    
+    def cruce_ah_cc_unifica(self):
+        pass
         
 contro = controlador()
-contro.cruce_CSClientes_p2c()
+contro.cruce_p2c()
