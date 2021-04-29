@@ -1,3 +1,4 @@
+import pandas as pd
 from cargaDatos import cargaDatos
 from cross_selling import cross_selling
 
@@ -49,18 +50,9 @@ class controlador:
                     
     def cruce_cc_unifica(self):
         cc_unifica = self.cargaDatos.cc_unifica()
+        cc_unifica.make_DF()
         print("Creando cruce cartera y ccUnifica")
-        
-        for indice_fila, fila in cc_unifica.iterrows():
-            if fila[" MIS "] in list(self.cartera['MisCliente']):
-                self.objetCartera = self.cartera.loc[self.cartera['MisCliente'] == fila[" MIS "]]
-                if fila[" MIS "] not in list(self.crossSelling.MontosCliente['MIS']):
-                    if (len(self.objetCartera) == 1):
-                        self.crear_fila_ccUnifica(fila)
-                    else:
-                        print(len(self.objetCartera))
-                        print(fila[" MIS "])
-        self.crossSelling.make_Excel()
+        cc_unifica.df = pd.merge(cc_unifica.df, self.cartera, how='inner', right_on='MisCliente', left_on=' MIS ')
         
 contro = controlador()
 contro.cruce_cc_unifica()

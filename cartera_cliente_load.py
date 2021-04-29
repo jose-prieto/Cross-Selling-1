@@ -26,7 +26,7 @@ class cartera_cliente_load:
     
     def make_DF(self):
         print("Creando cartera")
-        conn = pdbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=C:\Users\José Prieto\Documents\Bancaribe\Enero\Cartera_Cliente_Inicio_Enero_2021.accdb')
+        conn = pdbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Enero\Cartera_Cliente_Inicio_Enero_2021.accdb')
         df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "Segmento Mis", "Unidad De Negocio", "Region", "Tipo_Atencion" FROM Cartera_Clientes_Enero_2020 WHERE "Tipo de Persona" = ?', conn, params=["PJ"])
         return self.recorrerDF(df)
 

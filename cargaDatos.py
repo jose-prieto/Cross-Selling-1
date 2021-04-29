@@ -14,7 +14,7 @@ from cartera_cliente_load import cartera_cliente_load
 class cargaDatos:
     
     #Atributos
-    ruta = r'C:\Users\José Prieto\Documents\Bancaribe\Enero'
+    ruta = r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Enero'
     
     #Constructor
     def __init__(self):
@@ -26,7 +26,7 @@ class cargaDatos:
     
     def cc_unifica(self):
         cc_unifica = cc_unifica_load(self.ruta)
-        return cc_unifica.make_DF()
+        return cc_unifica
     
     def ah_unifica(self):
         ah_unifica = ah_unifica_load(self.ruta)
