@@ -9,9 +9,6 @@ class P2C_Transacciones_load:
     #Constructor
     def __init__(self, ruta):
         self.ruta = ruta
-        
-    def sumar_p2c(self, df):
-        return df.groupby('RIF', as_index=False)[['Monto de la operacion']].sum()
     
     def quitarCeros(self, rifCliente):
         aux = rifCliente[1:]
@@ -28,7 +25,7 @@ class P2C_Transacciones_load:
         print("Creando p2c")
         df = pd.read_excel(self.ruta + self.nombre_archivo + 'es enero.xlsx', usecols = 'C,D', header=0, index_col=False, keep_default_na=True)
         df['Monto de la operacion'] = df['Monto de la operacion'].astype(float)
-        df = self.sumar_p2c(df)
+        df = df.groupby('RIF', as_index=False)[['Monto de la operacion']].sum()
         df = self.recorrerDF(df)
         return df
     
