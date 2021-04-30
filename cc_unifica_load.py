@@ -6,14 +6,14 @@ class cc_unifica_load:
     #Atributos
     ruta = ''
     nombre_archivo = '\cc_unifica_'
-    conn = pdbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=C:\Users\bc221066\Documents\José Prieto\CrossSelling.accdb')
+    #conn = pdbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=C:\Users\José Prieto\Documents\Bancaribe\Enero\CrossSelling.accdb')
     
     #Constructor
     def __init__(self, ruta):
         self.ruta = ruta
         self.df = pd.read_csv(self.ruta + self.nombre_archivo + '2901.txt', delimiter='|', index_col=False, dtype=str, encoding='latin-1')
         
-    def insertDfAccess(self,df):
+    """def insertDfAccess(self,df):
         try:
             cursor = self.conn.cursor()
             for indice_fila, fila in df.iterrows():
@@ -25,11 +25,17 @@ class cc_unifica_load:
             print(inst)
         finally:
             self.conn.commit()
-            self.conn.close()
+            self.conn.close()"""
     
     def make_DF(self):
         print("Creando cc_unifica")
         self.df[' Monto Contable '] = self.df[' Monto Contable '].astype(float)
-        self.df = self.df[(self.df[" Tipo Persona "] == "PERSONA JURIDICA") & ((self.df[" Estatus de la Operacion "] == "ACTIVA") | (self.df[" Estatus de la Operacion "] == "INACTIVA"))]
+        self.df[' Oficina Contable '] = self.df[' Oficina Contable '].astype(int)
+        self.df = self.df[(self.df[" Oficina Contable "] >= 700) & (self.df[" Tipo Persona "] == "PERSONA JURIDICA") & 
+                          ((self.df[" Estatus de la Operacion "] == "ACTIVA") | (self.df[" Estatus de la Operacion "] == "INACTIVA")) & 
+                          (self.df[" Categoria "] != "B") & (self.df[" Categoria "] != "F") & (self.df[" Categoria "] != "H") & (self.df[" Categoria "] != "J") & (self.df[" Categoria "] != "K") & (self.df[" Categoria "] != "V")]
         self.df = self.df.groupby([' MIS '], as_index=False).agg({'Cedula/RIF ': 'first', ' Tipo Persona ': 'first', ' Estatus de la Operacion ': 'first', ' Producto ': 'first', ' Categoria ': 'first', ' Monto Contable ': sum})
         return self.df
+    
+#p = cc_unifica_load(r'C:\Users\José Prieto\Documents\Bancaribe\Enero')
+#cc = p.make_DF()

@@ -14,7 +14,7 @@ from cartera_cliente_load import cartera_cliente_load
 class cargaDatos:
     
     #Atributos
-    ruta = r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Enero'
+    ruta = r'C:\Users\José Prieto\Documents\Bancaribe\Enero'
     
     #Constructor
     def __init__(self):
@@ -22,7 +22,7 @@ class cargaDatos:
         
     def pf_unifica(self):
         pf_unifica = pf_unifica_load(self.ruta)
-        return pf_unifica.make_DF()
+        return pf_unifica
     
     def cc_unifica(self):
         cc_unifica = cc_unifica_load(self.ruta)
@@ -30,7 +30,7 @@ class cargaDatos:
     
     def ah_unifica(self):
         ah_unifica = ah_unifica_load(self.ruta)
-        return ah_unifica.make_DF()
+        return ah_unifica
     
     def rrgg_institucional(self):
         rrgg_institucional = rrgg_institucional_load(self.ruta)
@@ -44,9 +44,9 @@ class cargaDatos:
         rrgg_empresa = rrgg_empresa_load(self.ruta)
         return rrgg_empresa.make_DF()
     
-    def P2C(self):
+    def p2c(self):
         P2C_Transacciones = P2C_Transacciones_load(self.ruta)
-        return P2C_Transacciones.make_DF()
+        return P2C_Transacciones
     
     def TDC_ACTIVAS(self):
         tdc_activas = maestro_juridicos_load(self.ruta)
@@ -62,7 +62,7 @@ class cargaDatos:
     
     def ivr_conexion(self):
         ivr_conexion = ivr_conexion_load(self.ruta)
-        return ivr_conexion.make_DF()
+        return ivr_conexion
     
     def rrgg_pyme(self):
         rrgg_pyme = rrgg_pyme_load(self.ruta)
