@@ -9,7 +9,7 @@ class controlador:
         self.cartera = self.cargaDatos.cartera_cliente()
         self.crossSelling = cross_selling()
         self.objetCartera = ''
-        self.direccion = r'C:\Users\José Prieto\Desktop\archivos csv'
+        self.direccion = r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\archivos csv'
         
     def cruce_cc_unifica(self):
         cc_unifica = self.cargaDatos.cc_unifica()
@@ -46,14 +46,14 @@ class controlador:
     def cruce_ivr_conexion(self):
         ivr_conexion = self.cargaDatos.ivr_conexion()
         ivr_conexion.make_DF()
-        print("Creando cruce cartera y p2c")
+        print("Creando cruce cartera e ivr")
         ivr_conexion.df = pd.merge(ivr_conexion.df, self.cartera, how='inner', right_on='CedulaCliente', left_on='cedula')
         ivr_conexion.df.to_csv(self.direccion + "\ivr_conexion.csv", index = False, header=True, sep='|')
         return ivr_conexion.df
         
 contro = controlador()
-#cc_unifica = contro.cruce_cc_unifica()
-#ah_unifica = contro.cruce_ah_unifica()
-#p2c = contro.cruce_p2c()
-#pf = contro.cruce_pf_unifica()
+cc_unifica = contro.cruce_cc_unifica()
+ah_unifica = contro.cruce_ah_unifica()
+p2c = contro.cruce_p2c()
+pf = contro.cruce_pf_unifica()
 ivr_conexion = contro.cruce_ivr_conexion()

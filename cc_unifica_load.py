@@ -1,5 +1,5 @@
 import pandas as pd
-import pyodbc as pdbc
+import csv
 
 class cc_unifica_load:
     
@@ -11,7 +11,7 @@ class cc_unifica_load:
     #Constructor
     def __init__(self, ruta):
         self.ruta = ruta
-        self.df = pd.read_csv(self.ruta + self.nombre_archivo + '2901.txt', delimiter='|', index_col=False, dtype=str, encoding='latin-1')
+        self.df = pd.read_csv(self.ruta + self.nombre_archivo + '2901.txt', delimiter='|', index_col=False, dtype=str, encoding='latin-1', quoting=csv.QUOTE_NONE)
         
     """def insertDfAccess(self,df):
         try:
@@ -31,11 +31,12 @@ class cc_unifica_load:
         print("Creando cc_unifica")
         self.df[' Monto Contable '] = self.df[' Monto Contable '].astype(float)
         self.df[' Oficina Contable '] = self.df[' Oficina Contable '].astype(int)
-        self.df = self.df[(self.df[" Oficina Contable "] >= 700) & (self.df[" Tipo Persona "] == "PERSONA JURIDICA") & 
+        self.df = self.df[(self.df[" Oficina Contable "] <= 699) & (self.df[" Tipo Persona "] == "PERSONA JURIDICA") & 
                           ((self.df[" Estatus de la Operacion "] == "ACTIVA") | (self.df[" Estatus de la Operacion "] == "INACTIVA")) & 
+                          ((self.df[" Producto "] != "Corriente - CUENTA CORRIENTE MON. EXT DOLAR") & (self.df[" Producto "] != "Corriente - CUENTA CORRIENTE ME EN EUROS")) &
                           (self.df[" Categoria "] != "B") & (self.df[" Categoria "] != "F") & (self.df[" Categoria "] != "H") & (self.df[" Categoria "] != "J") & (self.df[" Categoria "] != "K") & (self.df[" Categoria "] != "V")]
         self.df = self.df.groupby([' MIS '], as_index=False).agg({'Cedula/RIF ': 'first', ' Tipo Persona ': 'first', ' Estatus de la Operacion ': 'first', ' Producto ': 'first', ' Categoria ': 'first', ' Monto Contable ': sum})
         return self.df
     
-#p = cc_unifica_load(r'C:\Users\José Prieto\Documents\Bancaribe\Enero')
+#p = cc_unifica_load(r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Enero')
 #cc = p.make_DF()

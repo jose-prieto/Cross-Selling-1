@@ -14,7 +14,7 @@ from cartera_cliente_load import cartera_cliente_load
 class cargaDatos:
     
     #Atributos
-    ruta = r'C:\Users\José Prieto\Documents\Bancaribe\Enero'
+    ruta = r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Enero'
     
     #Constructor
     def __init__(self):

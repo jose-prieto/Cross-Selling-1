@@ -29,5 +29,5 @@ class P2C_Transacciones_load:
         self.df = self.recorrerDF(self.df)
         return self.df
     
-#p = P2C_Transacciones_load(r'C:\Users\José Prieto\Documents\Bancaribe\Enero')
+#p = P2C_Transacciones_load(r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Enero')
 #p2c = p.make_DF()
