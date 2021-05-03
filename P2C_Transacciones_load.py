@@ -1,15 +1,19 @@
 import pandas as pd
+import glob as gb
 
 class P2C_Transacciones_load:
     
-    #Atributos
-    ruta = ''
-    nombre_archivo = '\\P2C_Transaccion'
-    
     #Constructor
     def __init__(self, ruta):
-        self.ruta = ruta
-        self.df = pd.read_excel(self.ruta + self.nombre_archivo + 'es enero.xlsx', usecols = 'C,D', header=0, index_col=False, keep_default_na=True)
+        print("Creando p2c")
+        self.nombre_archivo = '\P2C_'
+        self.rutaOrigin = ruta
+        for file in gb.glob(ruta + self.nombre_archivo + '*.xlsx'):
+            self.ruta = file
+        self.df = pd.read_excel(self.ruta, usecols = 'C,D', header=0, index_col=False, keep_default_na=True)
+        self.df['Monto de la operacion'] = self.df['Monto de la operacion'].astype(float)
+        self.df = self.df.groupby('RIF', as_index=False)[['Monto de la operacion']].sum()
+        self.df = self.recorrerDF(self.df)
     
     def quitarCeros(self, rifCliente):
         aux = rifCliente[1:]
@@ -22,12 +26,10 @@ class P2C_Transacciones_load:
             df.at[indice_fila,"RIF"] = self.quitarCeros(fila["RIF"])
         return df
     
-    def make_DF(self):
-        print("Creando p2c")
-        self.df['Monto de la operacion'] = self.df['Monto de la operacion'].astype(float)
-        self.df = self.df.groupby('RIF', as_index=False)[['Monto de la operacion']].sum()
-        self.df = self.recorrerDF(self.df)
+    def to_csv(self, cartera):
+        print("Creando cruce cartera y p2c")
+        self.df = pd.merge(self.df, cartera, how='inner', right_on='CedulaCliente', left_on='RIF')
+        self.df.to_csv(self.rutaOrigin + '\\rchivos csv\p2c.csv', index = False, header=True, sep='|')
         return self.df
     
-#p = P2C_Transacciones_load(r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Enero')
-#p2c = p.make_DF()
+#p2c = P2C_Transacciones_load(r'C:\Users\José Prieto\Documents\Bancaribe\Enero').to_csv()

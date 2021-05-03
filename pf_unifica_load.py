@@ -4,24 +4,23 @@ import csv
 
 class pf_unifica_load:
     
-    #Atributos
-    ruta = ''
-    nombre_archivo = '\pf_unifica_'
-    
     #Constructor
     def __init__(self, ruta):
-        self.ruta = ruta
-        for file in gb.glob(self.ruta + self.nombre_archivo + '*.txt'):
-            filename = file
-        self.df = pd.read_csv(filename, delimiter='|', index_col=False, dtype=str, encoding='latin-1', quoting=csv.QUOTE_NONE)
-    
-    def make_DF(self):       
         print("Cargando pf_unifica")
+        self.nombre_archivo = '\pf_'
+        self.rutaOrigin = ruta
+        for file in gb.glob(ruta + self.nombre_archivo + '*.txt'):
+            self.ruta = file
+        self.df = pd.read_csv(self.ruta, delimiter='|', index_col=False, dtype=str, encoding='latin-1', quoting=csv.QUOTE_NONE)
         self.df[' Monto '] = self.df[' Monto '].astype(float)
         self.df = self.df[(self.df[" Tipo Persona "] == "PERSONA JURIDICA") & 
                           ((self.df[" Estatus de la Operacion "] == "Activo") | (self.df[" Estatus de la Operacion "] == "Inactivo"))]
         self.df = self.df.groupby([' MIS '], as_index=False).agg({'Cedula/RIF ': 'first', ' Tipo Persona ': 'first', ' Estatus de la Operacion ': 'first', ' Producto ': 'first', ' Categoria ': 'first', ' Monto ': sum})
+    
+    def to_csv(self, cartera):
+        print("Creando cruce cartera y pfUnifica")
+        self.df = pd.merge(self.df, cartera, how='inner', right_on='MisCliente', left_on=' MIS ')
+        self.df.to_csv(self.rutaOrigin + '\\rchivos csv\pf_unifica.csv', index = False, header=True, sep='|')
         return self.df
     
-#aux = pf_unifica_load(r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Enero')
-#pf = aux.make_DF()
+#pf = pf_unifica_load(r'C:\Users\José Prieto\Documents\Bancaribe\Enero').to_csv()

@@ -1,59 +1,44 @@
-import pandas as pd
 from cargaDatos import cargaDatos
 from cross_selling import cross_selling
+from pathlib import Path
 
 class controlador:
     
-    def __init__(self):
-        self.cargaDatos = cargaDatos()
-        self.cartera = self.cargaDatos.cartera_cliente()
+    def __init__(self, ruta, db):
+        Path(ruta + '\\rchivos csv').mkdir(parents=True, exist_ok=True)
+        self.cargaDatos = cargaDatos(ruta)
+        self.cartera = self.cargaDatos.cartera_cliente(db)
         self.crossSelling = cross_selling()
-        self.objetCartera = ''
-        self.direccion = r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\archivos csv'
         
-    def cruce_cc_unifica(self):
-        cc_unifica = self.cargaDatos.cc_unifica()
-        cc_unifica.make_DF()
-        print("Creando cruce cartera y ccUnifica")
-        cc_unifica.df = pd.merge(cc_unifica.df, self.cartera, how='inner', right_on='MisCliente', left_on=' MIS ')
-        cc_unifica.df.to_csv(self.direccion + "\cc_unifica.csv", index = False, header=True, sep='|')
-        return cc_unifica.df
+    def cruce_unifica_csv(self):
+        unifica = self.cargaDatos.unifica(self.cartera)
+        return unifica.to_csv()
     
-    def cruce_ah_unifica(self):
-        ah_unifica = self.cargaDatos.ah_unifica()
-        ah_unifica.make_DF()
-        print("Creando cruce cartera y ahUnifica")
-        ah_unifica.df = pd.merge(ah_unifica.df, self.cartera, how='inner', right_on='MisCliente', left_on=' MIS ')
-        ah_unifica.df.to_csv(self.direccion + "\ch_unifica.csv", index = False, header=True, sep='|')
-        return ah_unifica.df
+    def cruce_tdv_csv(self):
+        tdv = self.cargaDatos.tdv(self.cartera)
+        return tdv.to_csv()
+    
+    def cruce_inventario_csv(self):
+        inventario = self.cargaDatos.inventario(self.cartera)
+        return inventario.to_csv()
     
     def cruce_pf_unifica(self):
         pf = self.cargaDatos.pf_unifica()
-        pf.make_DF()
-        print("Creando cruce cartera y pfUnifica")
-        pf.df = pd.merge(pf.df, self.cartera, how='inner', right_on='MisCliente', left_on=' MIS ')
-        pf.df.to_csv(self.direccion + "\pf_unifica.csv", index = False, header=True, sep='|')
-        return pf.df
+        return pf.to_csv(self.cartera)
     
     def cruce_p2c(self):
         p2c = self.cargaDatos.p2c()
-        p2c.make_DF()
-        print("Creando cruce cartera y p2c")
-        p2c.df = pd.merge(p2c.df, self.cartera, how='inner', right_on='CedulaCliente', left_on='RIF')
-        p2c.df.to_csv(self.direccion + "\p2c.csv", index = False, header=True, sep='|')
-        return p2c.df
+        return p2c.to_csv(self.cartera)
     
     def cruce_ivr_conexion(self):
         ivr_conexion = self.cargaDatos.ivr_conexion()
-        ivr_conexion.make_DF()
-        print("Creando cruce cartera e ivr")
-        ivr_conexion.df = pd.merge(ivr_conexion.df, self.cartera, how='inner', right_on='CedulaCliente', left_on='cedula')
-        ivr_conexion.df.to_csv(self.direccion + "\ivr_conexion.csv", index = False, header=True, sep='|')
-        return ivr_conexion.df
+        return ivr_conexion.to_csv(self.cartera)
+    
+    def crear_csvs(self):
+        self.cruce_inventario_csv()
+        #self.cruce_unifica_csv()
+        #self.cruce_tdv_csv()
+        #self.cruce_p2c()
+        #self.cruce_ivr_conexion()
         
-contro = controlador()
-cc_unifica = contro.cruce_cc_unifica()
-ah_unifica = contro.cruce_ah_unifica()
-p2c = contro.cruce_p2c()
-pf = contro.cruce_pf_unifica()
-ivr_conexion = contro.cruce_ivr_conexion()
+contro = controlador(r'C:\Users\José Prieto\Documents\Bancaribe\Enero', "Cartera_Clientes_Enero_2020").crear_csvs()

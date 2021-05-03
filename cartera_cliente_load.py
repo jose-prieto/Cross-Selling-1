@@ -1,16 +1,20 @@
 import pandas as pd
+import glob as gb
 import pyodbc as pdbc
 
 class cartera_cliente_load:
     
-    #Atributos
-    ruta = ''
-    nombre_archivo = '\Cartera_Cliente_Inicio_'
-    
     #Constructor
-    def __init__(self, ruta):
-        self.ruta = ruta
-        
+    def __init__(self, ruta, db):
+        print("Creando cartera")
+        self.nombre_archivo = '\Cartera_Cliente'
+        self.rutaOrigin = ruta
+        for file in gb.glob(ruta + self.nombre_archivo + '*.accdb'):
+            self.ruta = file
+        conn = pdbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=' + self.ruta)
+        self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "Segmento Mis", "Unidad De Negocio", "Region", "Tipo_Atencion" FROM ' + db + ' WHERE "Tipo de Persona" = ?', conn, params=["PJ"])
+        self.df = self.recorrerDF(self.df)
+
     def quitarCeros(self, rifCliente):
         aux = rifCliente[1:]
         while (len(aux) < 9):
@@ -22,15 +26,8 @@ class cartera_cliente_load:
             df.at[indice_fila,"CedulaCliente"] = self.quitarCeros(fila["CedulaCliente"])
         return df
     
-    def make_DF(self):
-        print("Creando cartera")
-        conn = pdbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Enero\Cartera_Cliente_Inicio_Enero_2021.accdb')
-        df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "Segmento Mis", "Unidad De Negocio", "Region", "Tipo_Atencion" FROM Cartera_Clientes_Enero_2020 WHERE "Tipo de Persona" = ?', conn, params=["PJ"])
-        df = self.recorrerDF(df)
-        df.to_csv(r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\archivos csv\cartera.csv', index = False, header=True, sep='|')
-        return df
+    def to_csv(self):
+        self.df.to_csv(self.rutaOrigin + '\\rchivos csv\cartera.csv', index = False, header=True, sep='|')
+        return self.df
 
-#cartera = cartera_cliente_load(r'C:\Users\José Prieto\Documents\Bancaribe\Enero')
-#writer = pd.ExcelWriter('cartera_juridico.xlsx')
-#cartera.make_DF()
-#writer.save()
+#cartera = cartera_cliente_load(r'C:\Users\José Prieto\Documents\Bancaribe\Marzo', 'Cartera_Clientes_Marzo_2021').to_csv()
