@@ -6,7 +6,6 @@ class ah_unifica_load:
     
     #Constructor
     def __init__(self, ruta, cartera):
-        print("Creando ah_unifica")
         self.nombre_archivo = '\\ah_unifica'
         self.rutaOrigin = ruta
         for file in gb.glob(ruta + self.nombre_archivo + '*.txt'):

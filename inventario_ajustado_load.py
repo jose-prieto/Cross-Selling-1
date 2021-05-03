@@ -4,7 +4,7 @@ import glob as gb
 class inventario_ajustado_load:
     
     #Constructor
-    def __init__(self, ruta, cartera):
+    def __init__(self, ruta, cartera, fecha):
         print("Creando inventario ajustado")
         self.rutaOrigin = ruta
         self.ruta = ruta
@@ -20,10 +20,12 @@ class inventario_ajustado_load:
         self.dfDolar = self.dfDolar.groupby(['mis'], as_index=False).agg({'vigente': sum})
         self.dfBs = self.df[(self.df["PRODUCTO AJUSTADO"] != "CRÉDITOS EN CUOTAS MONEDA EXTRANJERA")]
         self.dfBs = self.dfBs.groupby(['mis'], as_index=False).agg({'vigente': sum})
+        self.dfDolar = self.dfDolar.assign(fecha = fecha)
+        self.dfBs = self.dfBs.assign(fecha = fecha)
     
     def to_csv(self):
-        self.dfDolar.to_csv(self.rutaOrigin + '\\rchivos csv\inventario_dolar.csv', index = False, header=True, sep='|')
-        self.dfBs.to_csv(self.rutaOrigin + '\\rchivos csv\inventario_bs.csv', index = False, header=True, sep='|')
+        self.dfDolar.to_csv(self.rutaOrigin + '\\rchivos csv\credito_dolar.csv', index = False, header=True, sep='|')
+        self.dfBs.to_csv(self.rutaOrigin + '\\rchivos csv\credito_vigente.csv', index = False, header=True, sep='|')
     
 #todo = ah_unifica_load(r'C:\Users\José Prieto\Documents\Bancaribe\Marzo')
 #bs = todo.dfBs

@@ -5,7 +5,6 @@ class rrgg_pyme_load:
     
     #Constructor
     def __init__(self, ruta, cartera):
-        print("Creando rrgg_pyme")
         self.rutaOrigin = ruta
         self.ruta = ruta
         self.nombre_archivo = '\\rrgg pyme'

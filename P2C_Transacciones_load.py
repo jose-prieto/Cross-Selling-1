@@ -4,7 +4,7 @@ import glob as gb
 class P2C_Transacciones_load:
     
     #Constructor
-    def __init__(self, ruta):
+    def __init__(self, ruta, cartera, fecha):
         print("Creando p2c")
         self.nombre_archivo = '\P2C_'
         self.rutaOrigin = ruta
@@ -12,8 +12,11 @@ class P2C_Transacciones_load:
             self.ruta = file
         self.df = pd.read_excel(self.ruta, usecols = 'C,D', header=0, index_col=False, keep_default_na=True)
         self.df['Monto de la operacion'] = self.df['Monto de la operacion'].astype(float)
-        self.df = self.df.groupby('RIF', as_index=False)[['Monto de la operacion']].sum()
+        self.df = self.df.rename(columns={'RIF': 'rif', 'Monto de la operacion': 'monto'})
         self.df = self.recorrerDF(self.df)
+        self.df = pd.merge(self.df, cartera, how='inner', right_on='CedulaCliente', left_on='rif')
+        self.df = self.df.groupby(['rif'], as_index=False).agg({'monto': sum})
+        self.df = self.df.assign(fecha = fecha)
     
     def quitarCeros(self, rifCliente):
         aux = rifCliente[1:]
@@ -23,13 +26,10 @@ class P2C_Transacciones_load:
     
     def recorrerDF(self, df):
         for indice_fila, fila in df.iterrows():
-            df.at[indice_fila,"RIF"] = self.quitarCeros(fila["RIF"])
+            df.at[indice_fila,"rif"] = self.quitarCeros(fila["rif"])
         return df
     
-    def to_csv(self, cartera):
-        print("Creando cruce cartera y p2c")
-        self.df = pd.merge(self.df, cartera, how='inner', right_on='CedulaCliente', left_on='RIF')
+    def to_csv(self):
         self.df.to_csv(self.rutaOrigin + '\\rchivos csv\p2c.csv', index = False, header=True, sep='|')
-        return self.df
     
 #p2c = P2C_Transacciones_load(r'C:\Users\José Prieto\Documents\Bancaribe\Enero').to_csv()

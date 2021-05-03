@@ -8,7 +8,6 @@ class cc_unifica_load:
     
     #Constructor
     def __init__(self, ruta, cartera):
-        print("Creando cc_unifica")
         self.nombre_archivo = '\cc_unifica'
         self.rutaOrigin = ruta
         for file in gb.glob(ruta + self.nombre_archivo + '*.txt'):

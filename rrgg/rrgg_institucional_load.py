@@ -5,7 +5,6 @@ class rrgg_institucional_load:
     
     #Constructor
     def __init__(self, ruta, cartera):
-        print("Create rrgg_institucional")
         self.rutaOrigin = ruta
         self.ruta = ruta
         self.nombre_archivo = '\\rrgg institucional'

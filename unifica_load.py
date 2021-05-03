@@ -5,14 +5,17 @@ from ahorro_corriente.ah_unifica_load import ah_unifica_load
 class unifica_load:
     
     #Constructor
-    def __init__(self, ruta, cartera):
+    def __init__(self, ruta, cartera, fecha):
+        print("Creando unifica")
         self.ruta = ruta
         self.cc_unifica = cc_unifica_load(ruta, cartera)
         self.ah_unifica = ah_unifica_load(ruta, cartera)
-        print("Uniendo los unificas")
         self.dfBs = pd.concat([self.cc_unifica.dfBs, self.ah_unifica.dfBs]).groupby(['mis']).sum().reset_index()
+        self.dfBs = self.dfBs.assign(fecha = fecha)
         self.dfDolar = pd.concat([self.cc_unifica.dfDolar, self.ah_unifica.dfDolar]).groupby(['mis']).sum().reset_index()
+        self.dfDolar = self.dfDolar.assign(fecha = fecha)
         self.dfEuro = self.cc_unifica.dfEuro
+        self.dfEuro = self.dfEuro.assign(fecha = fecha)
     
     def to_csv(self):
         self.dfBs.to_csv(self.ruta + '\\rchivos csv\corriente_ahorro.csv', index = False, header=True, sep='|')
