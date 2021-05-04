@@ -66,4 +66,4 @@ class controlador:
         self.cruce_cash() #Completar información de cada columna del archivo nuevo con el archivo cash
         
         
-contro = controlador(r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Febrero', "Cartera_Clientes_Febrero_2021", '28/02/2021').crear_csvs()
+contro = controlador(r'C:\Users\José Prieto\Documents\Bancaribe\Enero', "Cartera_Clientes_Enero_2020", '31/01/2021').crear_csvs()

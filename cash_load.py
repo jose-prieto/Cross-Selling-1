@@ -1,5 +1,13 @@
 import pandas as pd
-from pap_load import pap_load
+from cash.pap_load import pap_load
+from cash.nom_load import nom_load
+from cash.dedicheq_load import dedicheq_load
+from cash.pet_load import pet_load
+from cash.ppt_load import ppt_load
+from cash.dom_load import dom_load
+from cash.edi_dom_load import edi_dom_load
+from cash.edi_nom_load import edi_nom_load
+from cash.edi_pap_load import edi_pap_load
 
 class cash_load:
     
@@ -10,6 +18,14 @@ class cash_load:
         input("Vacíe la información necesaria en el archivo de excel recién creado 'cash_llena.xlsx' en la ruta:\n\n" + ruta + "\n\ny luego presione Enter")
         self.ruta = ruta
         self.dfPap = pap_load(ruta, cartera, fecha)
+        self.dfnom = nom_load(ruta, cartera, fecha)
+        self.dfdedicheq = dedicheq_load(ruta, cartera, fecha)
+        self.dfpet = pet_load(ruta, cartera, fecha)
+        self.dfppt = ppt_load(ruta, cartera, fecha)
+        self.dfdom = dom_load(ruta, cartera, fecha)
+        self.dfedidom = edi_dom_load(ruta, cartera, fecha)
+        self.dfedinom = edi_nom_load(ruta, cartera, fecha)
+        self.dfedipap = edi_pap_load(ruta, cartera, fecha)
         
     def crear_excel(self, ruta):
         writer = pd.ExcelWriter(ruta + '\cash_llena.xlsx')
@@ -26,7 +42,15 @@ class cash_load:
         writer.save()
     
     def to_csv(self):
-        self.dfPap.df.to_csv(self.ruta + '\\rchivos csv\pap.csv', index = False, header=True, sep='|')
+        self.dfPap.df.to_csv(self.ruta + '\\rchivos csv\\pap.csv', index = False, header=True, sep='|')
+        self.dfnom.df.to_csv(self.ruta + '\\rchivos csv\\nom.csv', index = False, header=True, sep='|')
+        self.dfdedicheq.df.to_csv(self.ruta + '\\rchivos csv\\dedicheq.csv', index = False, header=True, sep='|')
+        self.dfpet.df.to_csv(self.ruta + '\\rchivos csv\\pet.csv', index = False, header=True, sep='|')
+        self.dfppt.df.to_csv(self.ruta + '\\rchivos csv\\ppt.csv', index = False, header=True, sep='|')
+        self.dfdom.df.to_csv(self.ruta + '\\rchivos csv\\dom.csv', index = False, header=True, sep='|')
+        self.dfedidom.df.to_csv(self.ruta + '\\rchivos csv\\edidom.csv', index = False, header=True, sep='|')
+        self.dfedinom.df.to_csv(self.ruta + '\\rchivos csv\\edinom.csv', index = False, header=True, sep='|')
+        self.dfedipap.df.to_csv(self.ruta + '\\rchivos csv\\edipap.csv', index = False, header=True, sep='|')
         
     """def insertDfAccess(self,df):
         try:

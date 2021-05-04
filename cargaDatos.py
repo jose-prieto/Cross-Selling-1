@@ -7,8 +7,6 @@ from tdc_juridica_load import tdc_juridica_load
 from puntos_venta_load import puntos_venta_load
 from inventario_ajustado_load import inventario_ajustado_load
 from P2C_Transacciones_load import P2C_Transacciones_load
-from maestro_juridicos_load import maestro_juridicos_load
-from reporte_pos_load import reporte_pos_load
 from ivr_conexion_load import ivr_conexion_load
 from cartera_cliente_load import cartera_cliente_load
 from custodia_load import custodia_load
