@@ -18,10 +18,17 @@ class inventario_ajustado_load:
         self.df['vigente'] = self.df['vigente'].astype(float)
         self.dfDolar = self.df[(self.df["PRODUCTO AJUSTADO"] == "CRÉDITOS EN CUOTAS MONEDA EXTRANJERA")]
         self.dfDolar = self.dfDolar.groupby(['mis'], as_index=False).agg({'vigente': sum})
+        self.dfDolar = self.dfDolar.assign(fecha = fecha)
+        self.dfDolar['vigente'] = self.dfDolar['vigente'].astype(str)
+        for i in range(len(self.dfDolar['vigente'])):
+            self.dfDolar['vigente'][i]=self.dfDolar['vigente'][i].replace('.',',')
+            
         self.dfBs = self.df[(self.df["PRODUCTO AJUSTADO"] != "CRÉDITOS EN CUOTAS MONEDA EXTRANJERA")]
         self.dfBs = self.dfBs.groupby(['mis'], as_index=False).agg({'vigente': sum})
-        self.dfDolar = self.dfDolar.assign(fecha = fecha)
         self.dfBs = self.dfBs.assign(fecha = fecha)
+        self.dfBs['vigente'] = self.dfBs['vigente'].astype(str)
+        for i in range(len(self.dfBs['vigente'])):
+            self.dfBs['vigente'][i]=self.dfBs['vigente'][i].replace('.',',')
     
     def to_csv(self):
         self.dfDolar.to_csv(self.rutaOrigin + '\\rchivos csv\credito_dolar.csv', index = False, header=True, sep='|')

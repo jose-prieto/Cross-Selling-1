@@ -17,6 +17,9 @@ class puntos_venta_load:
         self.df['monto'] = self.df['monto'].astype(float)
         self.df = self.df.groupby(['mis'], as_index=False).agg({'monto': sum})
         self.df = self.df.assign(fecha = fecha)
+        self.df['monto'] = self.df['monto'].astype(str)
+        for i in range(len(self.df['monto'])):
+            self.df['monto'][i]=self.df['monto'][i].replace('.',',')
     
     def to_csv(self):
         self.df.to_csv(self.rutaOrigin + '\\rchivos csv\\puntos_de_venta.csv', index = False, header=True, sep='|')

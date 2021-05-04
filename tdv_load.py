@@ -16,6 +16,9 @@ class tdv_load:
         self.pyme = rrgg_pyme_load(self.ruta, cartera)
         self.df = pd.concat([self.corporativo.df, self.empresa.df, self.institucional.df, self.pyme.df]).groupby(['mis']).sum().reset_index()
         self.df = self.df.assign(fecha = fecha)
+        self.df['monto'] = self.df['monto'].astype(str)
+        for i in range(len(self.df['monto'])):
+            self.df['monto'][i]=self.df['monto'][i].replace('.',',')
     
     def to_csv(self):
         self.df.to_csv(self.ruta + '\\rchivos csv\\tdv.csv', index = False, header=True, sep='|')

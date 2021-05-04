@@ -12,10 +12,21 @@ class unifica_load:
         self.ah_unifica = ah_unifica_load(ruta, cartera)
         self.dfBs = pd.concat([self.cc_unifica.dfBs, self.ah_unifica.dfBs]).groupby(['mis']).sum().reset_index()
         self.dfBs = self.dfBs.assign(fecha = fecha)
+        self.dfBs['monto'] = self.dfBs['monto'].astype(str)
+        for i in range(len(self.dfBs['monto'])):
+            self.dfBs['monto'][i]=self.dfBs['monto'][i].replace('.',',')
+            
         self.dfDolar = pd.concat([self.cc_unifica.dfDolar, self.ah_unifica.dfDolar]).groupby(['mis']).sum().reset_index()
         self.dfDolar = self.dfDolar.assign(fecha = fecha)
+        self.dfDolar['monto'] = self.dfDolar['monto'].astype(str)
+        for i in range(len(self.dfDolar['monto'])):
+            self.dfDolar['monto'][i]=self.dfDolar['monto'][i].replace('.',',')
+            
         self.dfEuro = self.cc_unifica.dfEuro
         self.dfEuro = self.dfEuro.assign(fecha = fecha)
+        self.dfEuro['monto'] = self.dfEuro['monto'].astype(str)
+        for i in range(len(self.dfEuro['monto'])):
+            self.dfEuro['monto'][i]=self.dfEuro['monto'][i].replace('.',',')
     
     def to_csv(self):
         self.dfBs.to_csv(self.ruta + '\\rchivos csv\corriente_ahorro.csv', index = False, header=True, sep='|')

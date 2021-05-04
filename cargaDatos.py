@@ -1,4 +1,3 @@
-from pf_unifica_load import pf_unifica_load
 from unifica_load import unifica_load
 from tdv_load import tdv_load
 from cash_load import cash_load
@@ -14,8 +13,9 @@ from custodia_load import custodia_load
 class cargaDatos:
     
     #Constructor
-    def __init__(self, ruta, fecha):
+    def __init__(self, ruta, rutadb, fecha):
         self.ruta = ruta
+        self.rutadb = rutadb + '\CROSSSELLING.accdb'
         self.fecha = fecha
         self.cartera = ''
     
@@ -50,7 +50,7 @@ class cargaDatos:
         return cash_load(self.ruta, self.cartera, self.fecha)
     
     def cartera_cliente(self, db):
-        self.cartera = cartera_cliente_load(self.ruta, db).to_csv()
+        return cartera_cliente_load(self.ruta, self.rutadb, db)
 
 #cargaDatos = cargaDatos()
 #pf_unifica = cargaDatos.pf_unifica()

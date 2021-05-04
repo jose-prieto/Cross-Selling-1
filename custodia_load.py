@@ -15,9 +15,15 @@ class custodia_load:
         self.dfDolar = self.df.groupby(['mis'], as_index=False).agg({'montoDolar': sum})
         self.dfDolar = self.dfDolar.rename(columns={'montoDolar': 'monto'})
         self.dfDolar = self.dfDolar.assign(fecha = fecha)
+        self.dfDolar['monto'] = self.dfDolar['monto'].astype(str)
+        for i in range(len(self.dfDolar['monto'])):
+            self.dfDolar['monto'][i]=self.dfDolar['monto'][i].replace('.',',')
         self.dfEuro = self.df = self.df.groupby(['mis'], as_index=False).agg({'montoEuro': sum})
         self.dfEuro = self.dfEuro.rename(columns={'montoEuro': 'monto'})
         self.dfEuro = self.dfEuro.assign(fecha = fecha)
+        self.dfEuro['monto'] = self.dfEuro['monto'].astype(str)
+        for i in range(len(self.dfEuro['monto'])):
+            self.dfEuro['monto'][i]=self.dfEuro['monto'][i].replace('.',',')
         
     def crear_excel(self, ruta):
         writer = pd.ExcelWriter(ruta + '\custodia_llenar.xlsx')

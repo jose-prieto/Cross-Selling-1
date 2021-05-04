@@ -25,15 +25,14 @@ class cc_unifica_load:
                           (self.df[" Categoria "] != "V") &
                           (self.df[" Estatus de la Operacion "] != "CANCELADA")]
         self.df = pd.merge(self.df, cartera, how='inner', right_on='MisCliente', left_on=' MIS ')
-        self.dfBs = self.df[(self.df[" Estatus de la Operacion "] != "CANCELADA") &
-                          (self.df[" Producto "] != "Corriente - CUENTA CORRIENTE MON. EXT DOLAR") & 
+        self.dfBs = self.df[(self.df[" Producto "] != "Corriente - CUENTA CORRIENTE MON. EXT DOLAR") & 
                           (self.df[" Producto "] != "Corriente - CUENTA CORRIENTE ME EN EUROS")]
         self.dfBs = self.dfBs.groupby([' MIS '], as_index=False).agg({' Monto Contable ': sum})
         self.dfBs = self.dfBs.rename(columns={' MIS ': 'mis', ' Monto Contable ': 'monto'})
         self.dfDolar = self.df[(self.df[" Producto "] == "Corriente - CUENTA CORRIENTE MON. EXT DOLAR")]
         self.dfDolar = self.dfDolar.groupby([' MIS '], as_index=False).agg({' Monto Contable ': sum})
         self.dfDolar = self.dfDolar.rename(columns={' MIS ': 'mis', ' Monto Contable ': 'monto'})
-        self.dfEuro = self.df[(self.df[" Producto "] != "Corriente - CUENTA CORRIENTE ME EN EUROS")]
+        self.dfEuro = self.df[(self.df[" Producto "] == "Corriente - CUENTA CORRIENTE ME EN EUROS")]
         self.dfEuro = self.dfEuro.groupby([' MIS '], as_index=False).agg({' Monto Contable ': sum})
         self.dfEuro = self.dfEuro.rename(columns={' MIS ': 'mis', ' Monto Contable ': 'monto'})
         

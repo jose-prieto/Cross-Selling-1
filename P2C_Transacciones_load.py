@@ -17,6 +17,9 @@ class P2C_Transacciones_load:
         self.df = pd.merge(self.df, cartera, how='inner', right_on='CedulaCliente', left_on='rif')
         self.df = self.df.groupby(['rif'], as_index=False).agg({'monto': sum})
         self.df = self.df.assign(fecha = fecha)
+        self.df['monto'] = self.df['monto'].astype(str)
+        for i in range(len(self.df['monto'])):
+            self.df['monto'][i]=self.df['monto'][i].replace('.',',')
     
     def quitarCeros(self, rifCliente):
         aux = rifCliente[1:]
