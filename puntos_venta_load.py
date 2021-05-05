@@ -1,5 +1,6 @@
 import pandas as pd
 import glob as gb
+import csv
 
 class puntos_venta_load:
     
@@ -22,6 +23,6 @@ class puntos_venta_load:
             self.df['monto'][i]=self.df['monto'][i].replace('.',',')
     
     def to_csv(self):
-        self.df.to_csv(self.rutaOrigin + '\\rchivos csv\\puntos_de_venta.csv', index = False, header=True, sep='|')
+        self.df.to_csv(self.rutaOrigin + '\\rchivos csv\\puntos_de_venta.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
     
 #pf = linea_cir_load(r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Enero').df

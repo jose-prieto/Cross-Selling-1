@@ -1,4 +1,5 @@
 import pandas as pd
+import csv
 
 class custodia_load:
     
@@ -32,8 +33,8 @@ class custodia_load:
         writer.save()
     
     def to_csv(self):
-        self.dfDolar.to_csv(self.ruta + '\\rchivos csv\custodiaDolar.csv', index = False, header=True, sep='|')
-        self.dfEuro.to_csv(self.ruta + '\\rchivos csv\custodiaEuro.csv', index = False, header=True, sep='|')
+        self.dfDolar.to_csv(self.ruta + '\\rchivos csv\custodiaDolar.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        self.dfEuro.to_csv(self.ruta + '\\rchivos csv\custodiaEuro.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
         
     """def insertDfAccess(self,df):
         try:

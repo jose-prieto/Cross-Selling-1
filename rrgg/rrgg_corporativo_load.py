@@ -1,5 +1,6 @@
 import pandas as pd
 import glob as gb
+import csv
 
 class rrgg_corporativo_load:
     
@@ -18,6 +19,6 @@ class rrgg_corporativo_load:
         self.df = self.df.groupby(['mis'], as_index=False).agg({'monto': sum})
     
     def to_csv(self):
-        self.df.to_csv(self.rutaOrigin + '\\rchivos csv\rrgg_corporativo.csv', index = False, header=True, sep='|')
+        self.df.to_csv(self.rutaOrigin + '\\rchivos csv\rrgg_corporativo.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
 
 #rrgg_cirporativo = rrgg_corporativo_load(r'C:\Users\José Prieto\Documents\Bancaribe\Enero').df

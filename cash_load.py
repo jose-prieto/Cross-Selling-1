@@ -1,4 +1,5 @@
 import pandas as pd
+import csv
 from cash.pap_load import pap_load
 from cash.nom_load import nom_load
 from cash.dedicheq_load import dedicheq_load
@@ -45,47 +46,47 @@ class cash_load:
         self.dfPap.df['monto'] = self.dfPap.df['monto'].astype(str)
         for i in range(len(self.dfPap.df['monto'])):
             self.dfPap.df['monto'][i]=self.dfPap.df['monto'][i].replace('.',',')
-        self.dfPap.df.to_csv(self.ruta + '\\rchivos csv\\pap.csv', index = False, header=True, sep='|')
+        self.dfPap.df.to_csv(self.ruta + '\\rchivos csv\\pap.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
         
         self.dfnom.df['monto'] = self.dfnom.df['monto'].astype(str)
         for i in range(len(self.dfnom.df['monto'])):
             self.dfnom.df['monto'][i]=self.dfnom.df['monto'][i].replace('.',',')
-        self.dfnom.df.to_csv(self.ruta + '\\rchivos csv\\nom.csv', index = False, header=True, sep='|')
+        self.dfnom.df.to_csv(self.ruta + '\\rchivos csv\\nom.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
         
         self.dfdedicheq.df['monto'] = self.dfdedicheq.df['monto'].astype(str)
         for i in range(len(self.dfdedicheq.df['monto'])):
             self.dfdedicheq.df['monto'][i]=self.dfdedicheq.df['monto'][i].replace('.',',')
-        self.dfdedicheq.df.to_csv(self.ruta + '\\rchivos csv\\dedicheq.csv', index = False, header=True, sep='|')
+        self.dfdedicheq.df.to_csv(self.ruta + '\\rchivos csv\\dedicheq.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
         
         self.dfpet.df['monto'] = self.dfpet.df['monto'].astype(str)
         for i in range(len(self.dfpet.df['monto'])):
             self.dfpet.df['monto'][i]=self.dfpet.df['monto'][i].replace('.',',')
-        self.dfpet.df.to_csv(self.ruta + '\\rchivos csv\\pet.csv', index = False, header=True, sep='|')
+        self.dfpet.df.to_csv(self.ruta + '\\rchivos csv\\pet.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
         
         self.dfppt.df['monto'] = self.dfppt.df['monto'].astype(str)
         for i in range(len(self.dfppt.df['monto'])):
             self.dfppt.df['monto'][i]=self.dfppt.df['monto'][i].replace('.',',')
-        self.dfppt.df.to_csv(self.ruta + '\\rchivos csv\\ppt.csv', index = False, header=True, sep='|')
+        self.dfppt.df.to_csv(self.ruta + '\\rchivos csv\\ppt.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
         
         self.dfdom.df['monto'] = self.dfdom.df['monto'].astype(str)
         for i in range(len(self.dfdom.df['monto'])):
             self.dfdom.df['monto'][i]=self.dfdom.df['monto'][i].replace('.',',')
-        self.dfdom.df.to_csv(self.ruta + '\\rchivos csv\\dom.csv', index = False, header=True, sep='|')
+        self.dfdom.df.to_csv(self.ruta + '\\rchivos csv\\dom.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
         
         self.dfedidom.df['monto'] = self.dfedidom.df['monto'].astype(str)
         for i in range(len(self.dfedidom.df['monto'])):
             self.dfedidom.df['monto'][i]=self.dfedidom.df['monto'][i].replace('.',',')
-        self.dfedidom.df.to_csv(self.ruta + '\\rchivos csv\\edidom.csv', index = False, header=True, sep='|')
+        self.dfedidom.df.to_csv(self.ruta + '\\rchivos csv\\edidom.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
         
         self.dfedinom.df['monto'] = self.dfedinom.df['monto'].astype(str)
         for i in range(len(self.dfedinom.df['monto'])):
             self.dfedinom.df['monto'][i]=self.dfedinom.df['monto'][i].replace('.',',')
-        self.dfedinom.df.to_csv(self.ruta + '\\rchivos csv\\edinom.csv', index = False, header=True, sep='|')
+        self.dfedinom.df.to_csv(self.ruta + '\\rchivos csv\\edinom.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
         
         self.dfedipap.df['monto'] = self.dfedipap.df['monto'].astype(str)
         for i in range(len(self.dfedipap.df['monto'])):
             self.dfedipap.df['monto'][i]=self.dfedipap.df['monto'][i].replace('.',',')
-        self.dfedipap.df.to_csv(self.ruta + '\\rchivos csv\\edipap.csv', index = False, header=True, sep='|')
+        self.dfedipap.df.to_csv(self.ruta + '\\rchivos csv\\edipap.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
         
     """def insertDfAccess(self,df):
         try:

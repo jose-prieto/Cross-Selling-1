@@ -1,6 +1,7 @@
 import pandas as pd
 import glob as gb
 import pyodbc as pdbc
+import csv
 
 class cartera_cliente_load:
     
@@ -16,6 +17,7 @@ class cartera_cliente_load:
         self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "Segmento Mis", "Unidad De Negocio", "Region", "Tipo_Atencion" FROM ' + db + ' WHERE "Tipo de Persona" = ?', conn, params=["PJ"])
         self.dfaux = self.df
         self.df = self.recorrerDF(self.df)
+        self.df['MisCliente'] = self.df['MisCliente'].astype(str)
 
     def quitarCeros(self, rifCliente):
         aux = rifCliente[1:]
@@ -29,7 +31,7 @@ class cartera_cliente_load:
         return df
     
     def to_csv(self):
-        self.df.to_csv(self.rutaOrigin + '\\rchivos csv\cartera.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        self.df.to_csv(self.rutaOrigin + '\\rchivos csv\cartera.csv', index = False, header=True, sep='|', encoding='UTF-8', quoting=csv.QUOTE_NONE)
         
     def to_db(self):
         conn = pdbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=' + self.rutadb)

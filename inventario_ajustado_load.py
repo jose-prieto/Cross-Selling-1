@@ -1,5 +1,6 @@
 import pandas as pd
 import glob as gb
+import csv
 
 class inventario_ajustado_load:
     
@@ -31,8 +32,8 @@ class inventario_ajustado_load:
             self.dfBs['vigente'][i]=self.dfBs['vigente'][i].replace('.',',')
     
     def to_csv(self):
-        self.dfDolar.to_csv(self.rutaOrigin + '\\rchivos csv\credito_dolar.csv', index = False, header=True, sep='|')
-        self.dfBs.to_csv(self.rutaOrigin + '\\rchivos csv\credito_vigente.csv', index = False, header=True, sep='|')
+        self.dfDolar.to_csv(self.rutaOrigin + '\\rchivos csv\credito_dolar.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        self.dfBs.to_csv(self.rutaOrigin + '\\rchivos csv\credito_vigente.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
     
 #todo = ah_unifica_load(r'C:\Users\José Prieto\Documents\Bancaribe\Marzo')
 #bs = todo.dfBs

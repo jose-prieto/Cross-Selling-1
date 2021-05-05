@@ -34,8 +34,8 @@ class ah_unifica_load:
         self.dfDolar = self.dfDolar.rename(columns={' MIS ': 'mis', ' Monto Contable ': 'monto'})
     
     def to_csv(self, cartera):
-        self.dfBs.to_csv(self.rutaOrigin + '\\rchivos csv\h_unifica_Bs.csv', index = False, header=True, sep='|')
-        self.dfDolar.to_csv(self.rutaOrigin + '\\rchivos csv\h_unifica_Bs.csv', index = False, header=True, sep='|')
+        self.dfBs.to_csv(self.rutaOrigin + '\\rchivos csv\h_unifica_Bs.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        self.dfDolar.to_csv(self.rutaOrigin + '\\rchivos csv\h_unifica_Bs.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
     
 #todo = ah_unifica_load(r'C:\Users\José Prieto\Documents\Bancaribe\Marzo')
 #bs = todo.dfBs

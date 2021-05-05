@@ -19,38 +19,39 @@ class cargaDatos:
         self.fecha = fecha
         self.cartera = ''
     
+    def cartera_cliente(self, db):
+        self.cartera = cartera_cliente_load(self.ruta, self.rutadb, db)
+        return self.cartera.df
+    
     def unifica(self):
-        return unifica_load(self.ruta, self.cartera, self.fecha)
+        return unifica_load(self.ruta, self.cartera.df, self.fecha)
     
     def tdv(self):
-        return tdv_load(self.ruta, self.cartera, self.fecha)
-    
-    def inventario(self):
-        return inventario_ajustado_load(self.ruta, self.cartera, self.fecha)
+        return tdv_load(self.ruta, self.cartera.df, self.fecha)
     
     def linea_cir(self):
-        return linea_cir_load(self.ruta, self.cartera, self.fecha)
+        return linea_cir_load(self.ruta, self.cartera.df, self.fecha)
     
     def tdc_juridica(self):
-        return tdc_juridica_load(self.ruta, self.cartera, self.fecha)
+        return tdc_juridica_load(self.ruta, self.cartera.df, self.fecha)
     
     def puntos_venta(self):
-        return puntos_venta_load(self.ruta, self.cartera, self.fecha)
+        return puntos_venta_load(self.ruta, self.cartera.df, self.fecha)
     
     def ivr_conexion(self):
-        return ivr_conexion_load(self.ruta, self.cartera, self.fecha)
+        return ivr_conexion_load(self.ruta, self.cartera.df, self.fecha)
     
     def p2c(self):
-        return P2C_Transacciones_load(self.ruta, self.cartera, self.fecha)
+        return P2C_Transacciones_load(self.ruta, self.cartera.df, self.fecha)
+    
+    def inventario(self):
+        return inventario_ajustado_load(self.ruta, self.cartera.df, self.fecha)
     
     def custodia(self):
-        return custodia_load(self.ruta, self.cartera, self.fecha)
+        return custodia_load(self.ruta, self.cartera.df, self.fecha)
     
     def cash(self):
-        return cash_load(self.ruta, self.cartera, self.fecha)
-    
-    def cartera_cliente(self, db):
-        return cartera_cliente_load(self.ruta, self.rutadb, db)
+        return cash_load(self.ruta, self.cartera.df, self.fecha)
 
 #cargaDatos = cargaDatos()
 #pf_unifica = cargaDatos.pf_unifica()

@@ -1,11 +1,13 @@
 import pandas as pd
 import glob as gb
+import csv
 
 class linea_cir_load:
     
     #Constructor
     def __init__(self, ruta, cartera, fecha):
         print("Creando lineas CIR")
+        self.fecha = fecha
         self.rutaOrigin = ruta
         self.ruta = ruta
         self.nombre_archivo = '\\REPORTES DE CIR'
@@ -19,20 +21,23 @@ class linea_cir_load:
         self.df['montoDolar'] = self.df['montoDolar'].astype(float)
         self.dfBs = self.df.groupby(['mis'], as_index=False).agg({'montoBs': sum})
         self.dfBs = self.dfBs.rename(columns={'montoBs': 'monto'})
-        self.dfBs = self.dfBs.assign(fecha = fecha)
         self.dfBs['monto'] = self.dfBs['monto'].astype(str)
         for i in range(len(self.dfBs['monto'])):
             self.dfBs['monto'][i]=self.dfBs['monto'][i].replace('.',',')
             
         self.dfDolar = self.df.groupby(['mis'], as_index=False).agg({'montoDolar': sum})
         self.dfDolar = self.dfBs.rename(columns={'montoDolar': 'monto'})
-        self.dfDolar = self.dfDolar.assign(fecha = fecha)
         self.dfDolar['monto'] = self.dfDolar['monto'].astype(str)
         for i in range(len(self.dfDolar['monto'])):
             self.dfDolar['monto'][i]=self.dfDolar['monto'][i].replace('.',',')
+            
+        self.dfMonto = pd.merge(self.dfBs.rename(columns={'monto': 'Línea/CIR Monto Vigente aprobado (Bs.)'}), self.dfDolar.rename(columns={'monto': 'Línea/CIR Monto Vigente aprobado (USD)'}), how='outer', right_on='mis', left_on='mis')
+        
+        self.dfBs = self.dfBs.assign(fecha = self.fecha)
+        self.dfDolar = self.dfDolar.assign(fecha = self.fecha)
     
     def to_csv(self):
-        self.dfBs.to_csv(self.rutaOrigin + '\\rchivos csv\lineaBs.csv', index = False, header=True, sep='|')
-        self.dfDolar.to_csv(self.rutaOrigin + '\\rchivos csv\lineaDolar.csv', index = False, header=True, sep='|')
+        self.dfBs.to_csv(self.rutaOrigin + '\\rchivos csv\lineaBs.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        self.dfDolar.to_csv(self.rutaOrigin + '\\rchivos csv\lineaDolar.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
     
 #pf = linea_cir_load(r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Enero').df

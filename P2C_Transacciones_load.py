@@ -1,5 +1,6 @@
 import pandas as pd
 import glob as gb
+import csv
 
 class P2C_Transacciones_load:
     
@@ -33,6 +34,6 @@ class P2C_Transacciones_load:
         return df
     
     def to_csv(self):
-        self.df.to_csv(self.rutaOrigin + '\\rchivos csv\p2c.csv', index = False, header=True, sep='|')
+        self.df.to_csv(self.rutaOrigin + '\\rchivos csv\p2c.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
     
 #p2c = P2C_Transacciones_load(r'C:\Users\José Prieto\Documents\Bancaribe\Enero').to_csv()

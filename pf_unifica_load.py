@@ -20,7 +20,7 @@ class pf_unifica_load:
     def to_csv(self, cartera):
         print("Creando cruce cartera y pfUnifica")
         self.df = pd.merge(self.df, cartera, how='inner', right_on='MisCliente', left_on=' MIS ')
-        self.df.to_csv(self.rutaOrigin + '\\rchivos csv\pf_unifica.csv', index = False, header=True, sep='|')
+        self.df.to_csv(self.rutaOrigin + '\\rchivos csv\pf_unifica.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
         return self.df
     
 #pf = pf_unifica_load(r'C:\Users\José Prieto\Documents\Bancaribe\Enero').to_csv()

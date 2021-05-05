@@ -51,9 +51,9 @@ class cc_unifica_load:
             self.conn.close()"""
     
     def to_csv(self):
-        self.dfBs.to_csv(self.rutaOrigin + '\\rchivos csv\cc_unifica_BS.csv', index = False, header=True, sep='|')
-        self.dfDolar.to_csv(self.rutaOrigin + '\\rchivos csv\cc_unifica_Dolar.csv', index = False, header=True, sep='|')
-        self.dfEuro.to_csv(self.rutaOrigin + '\\rchivos csv\cc_unifica_Euro.csv', index = False, header=True, sep='|')
+        self.dfBs.to_csv(self.rutaOrigin + '\\rchivos csv\cc_unifica_BS.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        self.dfDolar.to_csv(self.rutaOrigin + '\\rchivos csv\cc_unifica_Dolar.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        self.dfEuro.to_csv(self.rutaOrigin + '\\rchivos csv\cc_unifica_Euro.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
     
 #todo = cc_unifica_load(r'C:\Users\José Prieto\Documents\Bancaribe\Enero')
 #Bs = todo.dfBs
