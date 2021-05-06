@@ -16,7 +16,10 @@ class ivr_conexion_load:
         self.df = self.df.rename(columns={"cedula": 'rif'})
         self.df = self.recorrerDF(self.df)
         self.df = pd.merge(self.df, cartera, how='inner', right_on='CedulaCliente', left_on='rif')
-        self.df = self.df.groupby(['rif'], as_index=False).agg({'rif': 'first'})
+        self.df = self.df.groupby(['MisCliente'], as_index=False).agg({'MisCliente': 'first'})
+        
+        self.dfMonto = self.df.rename(columns={"monto": 'Conexión', "MisCliente": "mis"})
+        
         self.df = self.df.assign(fecha = fecha)
         
     def quitarCeros(self, rifCliente):

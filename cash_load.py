@@ -18,15 +18,31 @@ class cash_load:
         self.crear_excel(ruta)
         input("Vacíe la información necesaria en el archivo de excel recién creado 'cash_llena.xlsx' en la ruta:\n\n" + ruta + "\n\ny luego presione Enter")
         self.ruta = ruta
-        self.dfPap = pap_load(ruta, cartera, fecha)
-        self.dfnom = nom_load(ruta, cartera, fecha)
-        self.dfdedicheq = dedicheq_load(ruta, cartera, fecha)
-        self.dfpet = pet_load(ruta, cartera, fecha)
-        self.dfppt = ppt_load(ruta, cartera, fecha)
-        self.dfdom = dom_load(ruta, cartera, fecha)
-        self.dfedidom = edi_dom_load(ruta, cartera, fecha)
-        self.dfedinom = edi_nom_load(ruta, cartera, fecha)
-        self.dfedipap = edi_pap_load(ruta, cartera, fecha)
+        self.dfPap = pap_load(ruta, cartera, fecha).df
+        self.dfnom = nom_load(ruta, cartera, fecha).df
+        self.dfdedicheq = dedicheq_load(ruta, cartera, fecha).df
+        self.dfpet = pet_load(ruta, cartera, fecha).df
+        self.dfppt = ppt_load(ruta, cartera, fecha).df
+        self.dfdom = dom_load(ruta, cartera, fecha).df
+        self.dfedidom = edi_dom_load(ruta, cartera, fecha).df
+        self.dfedinom = edi_nom_load(ruta, cartera, fecha).df
+        self.dfedipap = edi_pap_load(ruta, cartera, fecha).df
+        
+        self.dfMonto = pd.merge(self.dfPap.rename(columns={'monto': 'Pagos a Proveedores'}), self.dfnom.rename(columns={'monto': 'Nómina'}), how='outer', right_on='mis', left_on='mis')
+        self.dfMonto = pd.merge(self.dfMonto, self.dfdedicheq.rename(columns={'monto': 'Dedicheq'}), how='outer', right_on='mis', left_on='mis')
+        self.dfMonto = pd.merge(self.dfMonto, self.dfpet.rename(columns={'monto': 'Pagos Especiales a Terceros'}), how='outer', right_on='mis', left_on='mis')
+        self.dfMonto = pd.merge(self.dfMonto, self.dfppt.rename(columns={'monto': 'Pagos por Taquilla'}), how='outer', right_on='mis', left_on='mis')
+        self.dfMonto = pd.merge(self.dfMonto, self.dfdom.rename(columns={'monto': 'Domiciliación'}), how='outer', right_on='mis', left_on='mis')
+        
+        self.dfPap = self.dfPap.assign(fecha = fecha)
+        self.dfnom = self.dfnom.assign(fecha = fecha)
+        self.dfdedicheq = self.dfdedicheq.assign(fecha = fecha)
+        self.dfpet = self.dfpet.assign(fecha = fecha)
+        self.dfppt = self.dfppt.assign(fecha = fecha)
+        self.dfdom = self.dfdom.assign(fecha = fecha)
+        self.dfedidom = self.dfedidom.assign(fecha = fecha)
+        self.dfedinom = self.dfedinom.assign(fecha = fecha)
+        self.dfedipap = self.dfedipap.assign(fecha = fecha)
         
     def crear_excel(self, ruta):
         writer = pd.ExcelWriter(ruta + '\cash_llena.xlsx')

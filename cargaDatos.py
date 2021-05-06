@@ -9,6 +9,8 @@ from P2C_Transacciones_load import P2C_Transacciones_load
 from ivr_conexion_load import ivr_conexion_load
 from cartera_cliente_load import cartera_cliente_load
 from custodia_load import custodia_load
+from mesa_cambio_load import mesa_cambio_load
+from exportacion_dolar_load import exportacion_dolar_load
 
 class cargaDatos:
     
@@ -52,6 +54,12 @@ class cargaDatos:
     
     def cash(self):
         return cash_load(self.ruta, self.cartera.df, self.fecha)
+    
+    def mesa_cambio(self):
+        return mesa_cambio_load(self.ruta, self.cartera.df, self.fecha)
+    
+    def exportacion(self):
+        return exportacion_dolar_load(self.ruta, self.cartera.df, self.fecha)
 
 #cargaDatos = cargaDatos()
 #pf_unifica = cargaDatos.pf_unifica()

@@ -16,11 +16,14 @@ class P2C_Transacciones_load:
         self.df = self.df.rename(columns={'RIF': 'rif', 'Monto de la operacion': 'monto'})
         self.df = self.recorrerDF(self.df)
         self.df = pd.merge(self.df, cartera, how='inner', right_on='CedulaCliente', left_on='rif')
-        self.df = self.df.groupby(['rif'], as_index=False).agg({'monto': sum})
-        self.df = self.df.assign(fecha = fecha)
+        self.df = self.df.groupby(['MisCliente'], as_index=False).agg({'monto': sum})
         self.df['monto'] = self.df['monto'].astype(str)
         for i in range(len(self.df['monto'])):
             self.df['monto'][i]=self.df['monto'][i].replace('.',',')
+            
+        self.dfMonto = self.df.rename(columns={'monto': 'P2C (Mensual)', "MisCliente": "mis"})
+        
+        self.df = self.df.assign(fecha = fecha)
     
     def quitarCeros(self, rifCliente):
         aux = rifCliente[1:]
