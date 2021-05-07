@@ -11,6 +11,7 @@ from cartera_cliente_load import cartera_cliente_load
 from custodia_load import custodia_load
 from mesa_cambio_load import mesa_cambio_load
 from exportacion_dolar_load import exportacion_dolar_load
+from intervencion_tdc_load import intervencion_tdc_load
 
 class cargaDatos:
     
@@ -60,6 +61,9 @@ class cargaDatos:
     
     def exportacion(self):
         return exportacion_dolar_load(self.ruta, self.cartera.df, self.fecha)
+    
+    def intervencion_tdc(self):
+        return intervencion_tdc_load(self.ruta, self.cartera.df, self.fecha)
 
 #cargaDatos = cargaDatos()
 #pf_unifica = cargaDatos.pf_unifica()

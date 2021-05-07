@@ -18,7 +18,7 @@ class ivr_conexion_load:
         self.df = pd.merge(self.df, cartera, how='inner', right_on='CedulaCliente', left_on='rif')
         self.df = self.df.groupby(['MisCliente'], as_index=False).agg({'MisCliente': 'first'})
         
-        self.dfMonto = self.df.rename(columns={"monto": 'Conexión', "MisCliente": "mis"})
+        self.dfMonto = self.df.rename(columns={"monto": 'Conexión', "MisCliente": "mis"}).assign(Conexión=1)
         
         self.df = self.df.assign(fecha = fecha)
         

@@ -24,7 +24,7 @@ class exportacion_dolar_load:
         for i in range(len(self.dfVenta['monto'])):
             self.dfVenta['monto'][i]=self.dfVenta['monto'][i].replace('.',',')
             
-        self.dfMonto = pd.merge(self.dfCompra.rename(columns={'monto': 'Intervención 20% Exportación Compra (USD)'}), self.dfVenta.rename(columns={'Intervención 20% Exportación Venta (USD)'}), how='outer', right_on='mis', left_on='mis')
+        self.dfMonto = pd.merge(self.dfCompra.rename(columns={'monto': 'Intervención 20% Exportación Compra (USD)'}), self.dfVenta.rename(columns={'monto': 'Intervención 20% Exportación Venta (USD)'}), how='outer', right_on='mis', left_on='mis')
             
         self.dfVenta = self.dfVenta.assign(fecha = fecha)
         self.dfCompra = self.dfCompra.assign(fecha = fecha)
