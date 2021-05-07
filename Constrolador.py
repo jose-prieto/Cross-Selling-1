@@ -2,7 +2,6 @@ from cross_selling import cross_selling
 from cargaDatos import cargaDatos
 from pathlib import Path
 import pandas as pd
-import numpy as np
 
 class controlador:
     
@@ -14,7 +13,8 @@ class controlador:
         self.crossSelling = cross_selling()
     
     def crear_excel(self):
-        carteraMonto = pd.merge(self.cargaDatos.unifica().dfMonto, self.cargaDatos.tdv().dfMonto, how='outer', left_on='mis', right_on='mis')
+        carteraMonto = self.cargaDatos.unifica().dfMonto
+        carteraMonto = pd.merge(carteraMonto, self.cargaDatos.tdv().dfMonto, how='outer', left_on='mis', right_on='mis')
         carteraMonto = pd.merge(carteraMonto, self.cargaDatos.mesa_cambio().dfMonto, how='outer', left_on='mis', right_on='mis')
         carteraMonto = pd.merge(carteraMonto, self.cargaDatos.exportacion().dfMonto, how='outer', left_on='mis', right_on='mis')
         carteraMonto = pd.merge(carteraMonto, self.cargaDatos.intervencion_tdc().dfMonto, how='outer', left_on='mis', right_on='mis')
@@ -38,5 +38,6 @@ class controlador:
     def insert_db(self):
         return self.cartera.to_db()
         
-contro = controlador(r'C:\Users\José Prieto\Documents\Bancaribe\Enero', r'C:\Users\José Prieto\Documents\Bancaribe\Cross Selling', "Cartera_Clientes_Enero_2020", '29/01/2021').crear_excel()
+    #Dirección en pc de archivos fuente, dirección de base de datos destino, nombre de la tabla dentro de la cartera clientes y fecha a asignar a cada registro.
+contro = controlador(r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Marzo', r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Cross Selling', "Cartera_Clientes_Marzo_2021", '26/03/2021').crear_excel()
 #contro = controlador(r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Enero', r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Cross Selling', "Cartera_Clientes_Enero_2020", '29/01/2021').insert_db()

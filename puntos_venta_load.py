@@ -12,7 +12,7 @@ class puntos_venta_load:
         self.nombre_archivo = '\\Reporte POS'
         for file in gb.glob(self.ruta + self.nombre_archivo + '*.xlsx'):
             self.ruta = file
-        self.df = pd.read_excel(self.ruta, usecols = 'D,L', header=0, index_col=False, keep_default_na=True, dtype=str)
+        self.df = pd.read_excel(self.ruta, usecols = 'A:Z', header=0, index_col=False, keep_default_na=True, dtype=str)
         self.df = self.df.rename(columns={"Mis": 'mis', "Mto del Mes": "monto"})
         self.df = pd.merge(self.df, cartera, how='inner', right_on='MisCliente', left_on='mis')
         self.df['monto'] = self.df['monto'].astype(float)

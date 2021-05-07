@@ -13,7 +13,7 @@ class inventario_ajustado_load:
         self.nombre_archivo = '\\INVENTARIO AJUSTADO'
         for file in gb.glob(self.ruta + self.nombre_archivo + '*.xlsx'):
             self.ruta = file
-        self.df = pd.read_excel(self.ruta, usecols = 'J,K,M,T', header=0, index_col=False, keep_default_na=True, sheet_name="INVENTARIO_DEL_DÍA", dtype=str)
+        self.df = pd.read_excel(self.ruta, usecols = 'A:AJ', header=0, index_col=False, keep_default_na=True, sheet_name="INVENTARIO_DEL_DÍA", dtype=str)
         self.df = self.df[(self.df["CI O RIF"].str.startswith(("J", "R", "G", "F")))]
         self.df = self.df.rename(columns={'MIS': 'mis', 'VIGENTE': 'vigente'})
         self.df = pd.merge(self.df, cartera, how='inner', right_on='MisCliente', left_on='mis')

@@ -1,9 +1,9 @@
-import pandas as pd
-import csv
+from rrgg.rrgg_institucional_load import rrgg_institucional_load
 from rrgg.rrgg_corporativo_load import rrgg_corporativo_load
 from rrgg.rrgg_empresa_load import rrgg_empresa_load
-from rrgg.rrgg_institucional_load import rrgg_institucional_load
 from rrgg.rrgg_pyme_load import rrgg_pyme_load
+import pandas as pd
+import csv
 
 class tdv_load:
     
