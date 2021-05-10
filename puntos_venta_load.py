@@ -14,8 +14,10 @@ class puntos_venta_load:
             self.ruta = file
         self.df = pd.read_excel(self.ruta, usecols = 'A:Z', header=0, index_col=False, keep_default_na=True, dtype=str)
         self.df = self.df.rename(columns={"Mis": 'mis', "Mto del Mes": "monto"})
-        self.df = pd.merge(self.df, cartera, how='inner', right_on='MisCliente', left_on='mis')
         self.df['monto'] = self.df['monto'].astype(float)
+        print("Puntos de venta total: ", self.df['monto'].sum())
+        
+        self.df = pd.merge(self.df, cartera, how='inner', right_on='MisCliente', left_on='mis')
         self.df = self.df.groupby(['mis'], as_index=False).agg({'monto': sum})
         self.df['monto'] = self.df['monto'].astype(str)
         for i in range(len(self.df['monto'])):

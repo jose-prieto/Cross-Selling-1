@@ -19,11 +19,13 @@ class tdv_load:
         self.pyme = rrgg_pyme_load(self.ruta, cartera)
         
         self.df = pd.concat([self.corporativo.df, self.empresa.df, self.institucional.df, self.pyme.df]).groupby(['mis']).sum().reset_index()
+            
+        self.dfMonto = self.df.rename(columns={'monto': 'TDV'})
+        print("DRV - TDV monto total: ", self.dfMonto['TDV'].sum(), "\n")
+        
         self.df['monto'] = self.df['monto'].astype(str)
         for i in range(len(self.df['monto'])):
             self.df['monto'][i]=self.df['monto'][i].replace('.',',')
-            
-        self.dfMonto = self.df.rename(columns={'monto': 'TDV'})
         
         self.df = self.df.assign(fecha = self.fecha)
     

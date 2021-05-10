@@ -16,18 +16,14 @@ from intervencion_tdc_load import intervencion_tdc_load
 class cargaDatos:
     
     #Constructor
-    def __init__(self, ruta, rutadb, fecha):
+    def __init__(self, ruta, rutadb, fecha, db):
+        self.rutadb = rutadb + '\CROSS_SELLING_JURIDICO.accdb'
         self.ruta = ruta
-        self.rutadb = rutadb + '\CROSSSELLING.accdb'
         self.fecha = fecha
-        self.cartera = ''
-    
-    def cartera_cliente(self, db):
         self.cartera = cartera_cliente_load(self.ruta, self.rutadb, db)
-        return self.cartera.df
     
     def unifica(self):
-        return unifica_load(self.ruta, self.cartera.df, self.fecha)
+        return unifica_load(self.ruta, self.rutadb, self.cartera.df, self.fecha)
     
     def tdv(self):
         return tdv_load(self.ruta, self.cartera.df, self.fecha)
@@ -51,7 +47,7 @@ class cargaDatos:
         return inventario_ajustado_load(self.ruta, self.cartera.df, self.fecha)
     
     def custodia(self):
-        return custodia_load(self.ruta, self.cartera.df, self.fecha)
+        return custodia_load(self.ruta, self.rutadb, self.cartera.df, self.fecha)
     
     def cash(self):
         return cash_load(self.ruta, self.cartera.df, self.fecha)

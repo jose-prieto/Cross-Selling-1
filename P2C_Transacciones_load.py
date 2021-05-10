@@ -11,9 +11,12 @@ class P2C_Transacciones_load:
         self.rutaOrigin = ruta
         for file in gb.glob(ruta + self.nombre_archivo + '*.xlsx'):
             self.ruta = file
-        self.df = pd.read_excel(self.ruta, usecols = 'C,D', header=0, index_col=False, keep_default_na=True)
+        self.df = pd.read_excel(self.ruta, usecols = 'A:G', header=0, index_col=False, keep_default_na=True)
         self.df['Monto de la operacion'] = self.df['Monto de la operacion'].astype(float)
         self.df = self.df.rename(columns={'RIF': 'rif', 'Monto de la operacion': 'monto'})
+        
+        print("P2C monto total: ", self.df['monto'].sum())
+        
         self.df = self.recorrerDF(self.df)
         self.df = pd.merge(self.df, cartera, how='inner', right_on='CedulaCliente', left_on='rif')
         self.df = self.df.groupby(['MisCliente'], as_index=False).agg({'monto': sum})
@@ -26,6 +29,9 @@ class P2C_Transacciones_load:
         self.df = self.df.assign(fecha = fecha)
     
     def quitarCeros(self, rifCliente):
+        aux = rifCliente
+        while (rifCliente[0] == " "):
+            aux = rifCliente[1:]
         aux = rifCliente[1:]
         while (len(aux) < 9):
             aux = '0' + aux

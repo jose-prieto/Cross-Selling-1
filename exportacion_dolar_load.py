@@ -10,15 +10,21 @@ class exportacion_dolar_load:
         input("Vacíe la información necesaria en el archivo de excel llamado 'exportacion_dolar.xlsx' recién creado en la ruta:\n\n" + ruta + "\n\nluego presione Enter")
         print("Creando exportación dolar\n")
         self.df = pd.read_excel(self.ruta + '\exportacion_dolar.xlsx', usecols = 'A:C', header=0, index_col=False, keep_default_na=True, dtype=str)
-        self.recorrerDF(self.df)
-        self.df = pd.merge(self.df, cartera, how='inner', right_on='CedulaCliente', left_on='rif')
         self.df['montoCompra'] = self.df['montoCompra'].astype(float)
         self.df['montoVenta'] = self.df['montoVenta'].astype(float)
+        
+        print("Exportación dólar compra: ", self.df['montoCompra'].sum())
+        print("Exportación dólar venta: ", self.df['montoVenta'].sum(), "\n")
+        
+        self.recorrerDF(self.df)
+        self.df = pd.merge(self.df, cartera, how='inner', right_on='CedulaCliente', left_on='rif')
+        
         self.dfCompra = self.df.groupby(['MisCliente'], as_index=False).agg({'montoCompra': sum})
         self.dfCompra = self.dfCompra.rename(columns={'montoCompra': 'monto', 'MisCliente': 'mis'})
         self.dfCompra['monto'] = self.dfCompra['monto'].astype(str)
         for i in range(len(self.dfCompra['monto'])):
             self.dfCompra['monto'][i]=self.dfCompra['monto'][i].replace('.',',')
+            
         self.dfVenta = self.df.groupby(['MisCliente'], as_index=False).agg({'montoVenta': sum})
         self.dfVenta = self.dfVenta.rename(columns={'montoVenta': 'monto', 'MisCliente': 'mis'})
         self.dfVenta['monto'] = self.dfVenta['monto'].astype(str)
@@ -31,6 +37,9 @@ class exportacion_dolar_load:
         self.dfCompra = self.dfCompra.assign(fecha = fecha)
 
     def quitarCeros(self, rifCliente):
+        aux = rifCliente
+        while (rifCliente[0] == " "):
+            aux = rifCliente[1:]
         aux = rifCliente[1:]
         while (len(aux) < 9):
             aux = '0' + aux

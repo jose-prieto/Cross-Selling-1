@@ -1,57 +1,80 @@
+import pyodbc as pdbc
 import pandas as pd
 import csv
 
 class custodia_load:
     
     #Constructor
-    def __init__(self, ruta, cartera, fecha):
+    def __init__(self, ruta, rutadb, cartera, fecha):
         self.crear_excel(ruta)
+        self.rutadb = rutadb
         self.ruta = ruta
         input("Vacíe la información necesaria en el archivo de excel llamado 'custodia_llenar.xlsx' recién creado en la ruta:\n\n" + ruta + "\n\nluego presione Enter")
         print("Creando custodia")
         self.df = pd.read_excel(self.ruta + '\custodia_llenar.xlsx', usecols = 'A:D', header=0, sheet_name = "custodia", index_col=False, keep_default_na=True, dtype=str)
-        self.df = pd.merge(self.df, cartera, how='inner', right_on='MisCliente', left_on='mis')
         self.df['montoDolar'] = self.df['montoDolar'].astype(float)
         self.df['montoEuro'] = self.df['montoEuro'].astype(float)
-        self.dfDolar = self.df.groupby(['mis'], as_index=False).agg({'montoDolar': sum})
-        self.dfDolar = self.dfDolar.rename(columns={'montoDolar': 'monto'})
-        self.dfDolar['monto'] = self.dfDolar['monto'].astype(str)
-        for i in range(len(self.dfDolar['monto'])):
-            self.dfDolar['monto'][i]=self.dfDolar['monto'][i].replace('.',',')
-        self.dfEuro = self.df.groupby(['mis'], as_index=False).agg({'montoEuro': sum})
-        self.dfEuro = self.dfEuro.rename(columns={'montoEuro': 'monto'})
-        self.dfEuro['monto'] = self.dfEuro['monto'].astype(str)
-        for i in range(len(self.dfEuro['monto'])):
-            self.dfEuro['monto'][i]=self.dfEuro['monto'][i].replace('.',',')
+        
+        self.df = self.df.groupby(['mis'], as_index=False).agg({'montoDolar': sum, 'montoEuro': sum})
+        
+        print("Custodia dólar: ", self.df['montoDolar'].sum())
+        print("Custodia euro: ", self.df['montoEuro'].sum())
+        
+        self.df = pd.merge(self.df, cartera, how='inner', right_on='MisCliente', left_on='mis')
             
-        self.dfMonto = pd.merge(self.dfDolar.rename(columns={'monto': 'Custodia (USD)'}), self.dfEuro.rename(columns={'monto': 'Custodia (Euro)'}), how='outer', right_on='mis', left_on='mis')
-            
-        self.dfEuro = self.dfEuro.assign(fecha = fecha)
-        self.dfDolar = self.dfDolar.assign(fecha = fecha)
+        self.df = self.df.assign(fecha = fecha)
         
     def crear_excel(self, ruta):
         writer = pd.ExcelWriter(ruta + '\custodia_llenar.xlsx')
         df = pd.DataFrame(columns = ['mis', 'cliente', 'montoDolar', 'montoEuro'])
         df.to_excel(writer, sheet_name="custodia", index=False)
         writer.save()
+        
+    def get_monto(self):
+        dfDolar = self.df.rename(columns={'montoDolar': 'monto'})
+        dfDolar['monto'] = dfDolar['monto'].astype(str)
+        for i in range(len(dfDolar['monto'])):
+            dfDolar['monto'][i]=dfDolar['monto'][i].replace('.',',')
+            
+        dfEuro = self.df.rename(columns={'montoEuro': 'monto'})
+        dfEuro['monto'] = dfEuro['monto'].astype(str)
+        for i in range(len(dfEuro['monto'])):
+            dfEuro['monto'][i]=dfEuro['monto'][i].replace('.',',')
+            
+        return pd.merge(dfDolar.rename(columns={'monto': 'Custodia (USD)'}), dfEuro.rename(columns={'monto': 'Custodia (Euro)'}), how='outer', right_on='mis', left_on='mis')
     
     def to_csv(self):
         self.dfDolar.to_csv(self.ruta + '\\rchivos csv\custodiaDolar.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
         self.dfEuro.to_csv(self.ruta + '\\rchivos csv\custodiaEuro.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
         
-    """def insertDfAccess(self,df):
+    def insertDf(self):
+        conn = pdbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=' + self.rutadb)
+        cursor = conn.cursor()
         try:
-            cursor = self.conn.cursor()
-            for indice_fila, fila in df.iterrows():
-                print("hola")
-                cursor.execute("INSERT INTO UNIFICA ([mis], [rif_cedula], [tipo_persona], [estatus_operacion], [producto], [categoria], [monto contable]) VALUES(?,?,?,?,?,?,?)", fila[" MIS "], fila["Cedula/RIF "], fila[" Tipo Persona "], fila[" Estatus de la Operacion "], fila[" Producto "], fila[" Categoria "], fila[" Monto Contable "])
-        except Exception as inst:
-            print(type(inst))
-            print(inst.args)
-            print(inst)
+            for indice_fila, fila in self.df.iterrows():
+                try:
+                    cursor.execute("INSERT INTO CUSTODIA ([mis], [monto_dolar], [monto_euro], [fecha]) VALUES(?,?,?,?)", 
+                                   fila["mis"], 
+                                   fila["montoDolar"], 
+                                   fila["montoEuro"], 
+                                   fila["fecha"])
+                except KeyError as llave:
+                    print(type(llave))
+                    print(llave.args)
+                    print(llave)
+                    print("Llave primaria")
+                except Exception as excep:
+                    print(type(excep))
+                    print(excep.args)
+                    print(excep)
+                finally:
+                    conn.commit()
+        except KeyError as llave:
+            print(type(llave))
+            print(llave.args)
+            print(llave)
         finally:
-            self.conn.commit()
-            self.conn.close()"""
+            conn.close()
     
 #todo = custodia_load(r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Febrero').df
 #ccBs = todo.cc_unifica.dfBs

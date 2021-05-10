@@ -16,9 +16,14 @@ class linea_cir_load:
         self.df = pd.read_excel(self.ruta, usecols = 'G,J,T,X', header=0, sheet_name = "CONSOLIDADO", index_col=False, skiprows=11, keep_default_na=True, dtype=str)
         self.df = self.df[(self.df["ESTATUS"] == "VIGENTE")]
         self.df = self.df.rename(columns={self.df.columns[0]: 'estatus', self.df.columns[1]: 'mis', self.df.columns[2]: 'montoBs', self.df.columns[3]: 'montoDolar'})
-        self.df = pd.merge(self.df, cartera, how='inner', right_on='MisCliente', left_on='mis')
         self.df['montoBs'] = self.df['montoBs'].astype(float)
         self.df['montoDolar'] = self.df['montoDolar'].astype(float)
+        
+        print("CIR Bs total: ", self.df['montoBs'].sum())
+        print("CIR dólar total: ", self.df['montoDolar'].sum(), "\n")
+        
+        self.df = pd.merge(self.df, cartera, how='inner', right_on='MisCliente', left_on='mis')
+        
         self.dfBs = self.df.groupby(['mis'], as_index=False).agg({'montoBs': sum})
         self.dfBs = self.dfBs.rename(columns={'montoBs': 'monto'})
         self.dfBs['monto'] = self.dfBs['monto'].astype(str)
@@ -40,4 +45,4 @@ class linea_cir_load:
         self.dfBs.to_csv(self.rutaOrigin + '\\rchivos csv\lineaBs.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
         self.dfDolar.to_csv(self.rutaOrigin + '\\rchivos csv\lineaDolar.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
     
-#pf = linea_cir_load(r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Enero').df
+#pf = linea_cir_load(r'C:\Users\José Prieto\Documents\Bancaribe\Enero', "29/01/2021").df

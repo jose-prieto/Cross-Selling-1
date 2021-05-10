@@ -13,13 +13,16 @@ class cartera_cliente_load:
         self.rutaOrigin = ruta
         for file in gb.glob(ruta + self.nombre_archivo + '*.accdb'):
             self.ruta = file
-        conn = pdbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=' + self.ruta)
-        self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "Segmento Mis", "Unidad De Negocio", "Region", "Tipo_Atencion" FROM ' + db + ' WHERE "Tipo de Persona" = ?', conn, params=["PJ"])
+        self.conn = pdbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=' + self.ruta)
+        self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "Segmento Mis", "Unidad De Negocio", "Region", "Tipo_Atencion" FROM ' + db + ' WHERE "Tipo de Persona" = ?', self.conn, params=["PJ"])
         self.dfaux = self.df
         self.df = self.recorrerDF(self.df)
         self.df['MisCliente'] = self.df['MisCliente'].astype(str)
 
     def quitarCeros(self, rifCliente):
+        aux = rifCliente
+        while (rifCliente[0] == " "):
+            aux = rifCliente[1:]
         aux = rifCliente[1:]
         while (len(aux) < 9):
             aux = '0' + aux
@@ -32,25 +35,38 @@ class cartera_cliente_load:
     
     def to_csv(self):
         self.df.to_csv(self.rutaOrigin + '\\rchivos csv\cartera.csv', index = False, header=True, sep='|', encoding='UTF-8', quoting=csv.QUOTE_NONE)
-        
-    def to_db(self):
+    
+    def insertDf(self):
         conn = pdbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=' + self.rutadb)
-        df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "Segmento Mis", "Unidad De Negocio", "Region", "Tipo_Atencion" FROM CARTERA', conn)
-        df['MisCliente'] = df['MisCliente'].astype(int)
-        df['CedulaCliente'] = df['CedulaCliente'].astype(str)
-        df['NombreCliente'] = df['NombreCliente'].astype(str)
-        df['Segmento Mis'] = df['Segmento Mis'].astype(str)
-        df['Unidad De Negocio'] = df['Unidad De Negocio'].astype(str)
-        df['Region'] = df['Region'].astype(str)
-        df['Tipo_Atencion'] = df['Tipo_Atencion'].astype(str)
-        
-        self.dfaux['MisCliente'] = self.dfaux['MisCliente'].astype(int)
-        self.dfaux['CedulaCliente'] = self.dfaux['CedulaCliente'].astype(str)
-        self.dfaux['NombreCliente'] = self.dfaux['NombreCliente'].astype(str)
-        self.dfaux['Segmento Mis'] = self.dfaux['Segmento Mis'].astype(str)
-        self.dfaux['Unidad De Negocio'] = self.dfaux['Unidad De Negocio'].astype(str)
-        self.dfaux['Region'] = self.dfaux['Region'].astype(str)
-        self.dfaux['Tipo_Atencion'] = self.dfaux['Tipo_Atencion'].astype(str)
-        return pd.concat([self.dfaux,df]).drop_duplicates(keep=False)
+        cursor = conn.cursor()
+        try:
+            for indice_fila, fila in self.df.iterrows():
+                try:
+                    cursor.execute("INSERT INTO CARTERA ([mis], [rif], [nombre], [segmento], [unidad], [region], [tipo_atencion]) VALUES(?,?,?,?,?,?,?)", 
+                                   fila["MisCliente"], 
+                                   fila["CedulaCliente"], 
+                                   fila["NombreCliente"], 
+                                   fila["Segmento Mis"], 
+                                   fila["Unidad De Negocio"], 
+                                   fila["Region"], 
+                                   fila["Tipo_Atencion"])
+                except KeyError as llave:
+                    print(type(llave))
+                    print(llave.args)
+                    print(llave)
+                    print("Llave primaria")
+                except Exception as excep:
+                    print(type(excep))
+                    print(excep.args)
+                    print(excep)
+                finally:
+                    conn.commit()
+        except KeyError as llave:
+            print(type(llave))
+            print(llave.args)
+            print(llave)
+        finally:
+            conn.close()
+            
 
 #cartera = cartera_cliente_load(r'C:\Users\José Prieto\Documents\Bancaribe\Marzo', 'Cartera_Clientes_Marzo_2021').to_csv()
