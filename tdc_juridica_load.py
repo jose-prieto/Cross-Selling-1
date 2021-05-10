@@ -20,9 +20,13 @@ class tdc_juridica_load:
         self.df = pd.merge(self.df, cartera, how='inner', right_on='MisCliente', left_on='mis')
         self.df = self.df.groupby(['mis'], as_index=False).agg({'mis': 'first'})
         
-        self.dfMonto = self.df.assign(TDC_Jurifica = 1)
-        
         self.df = self.df.assign(fecha = self.fecha)
+    
+    def get_usable(self):
+        df = self.df.assign(uso = 1)
+        df = df.rename(columns={'uso': 'TDC Jurídica'})
+        
+        return df.groupby(['mis'], as_index=False).agg({'TDC Jurídica': 'first'})
     
     def to_csv(self):
         self.df.to_csv(self.rutaOrigin + '\\rchivos csv\\tdc_juridico.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)

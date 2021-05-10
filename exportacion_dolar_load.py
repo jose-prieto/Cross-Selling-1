@@ -18,23 +18,34 @@ class exportacion_dolar_load:
         
         self.recorrerDF(self.df)
         self.df = pd.merge(self.df, cartera, how='inner', right_on='CedulaCliente', left_on='rif')
+        self.df = self.df.rename(columns={'MisCliente': 'mis'})
+        self.df = self.df.groupby(['mis'], as_index=False).agg({'montoCompra': sum, 'montoVenta': sum})
+            
+        self.df = self.df.assign(fecha = fecha)
         
-        self.dfCompra = self.df.groupby(['MisCliente'], as_index=False).agg({'montoCompra': sum})
-        self.dfCompra = self.dfCompra.rename(columns={'montoCompra': 'monto', 'MisCliente': 'mis'})
-        self.dfCompra['monto'] = self.dfCompra['monto'].astype(str)
-        for i in range(len(self.dfCompra['monto'])):
-            self.dfCompra['monto'][i]=self.dfCompra['monto'][i].replace('.',',')
+    def get_monto(self):
+        dfCompra = self.df.groupby(['mis'], as_index=False).agg({'montoCompra': sum})
+        dfCompra = dfCompra.rename(columns={'montoCompra': 'monto'})
+        
+        dfVenta = self.df.groupby(['mis'], as_index=False).agg({'montoVenta': sum})
+        dfVenta = dfVenta.rename(columns={'montoVenta': 'monto'})
+        
+        dfCompra['monto'] = dfCompra['monto'].astype(str)
+        for i in range(len(dfCompra['monto'])):
+            dfCompra['monto'][i]=dfCompra['monto'][i].replace('.',',')
             
-        self.dfVenta = self.df.groupby(['MisCliente'], as_index=False).agg({'montoVenta': sum})
-        self.dfVenta = self.dfVenta.rename(columns={'montoVenta': 'monto', 'MisCliente': 'mis'})
-        self.dfVenta['monto'] = self.dfVenta['monto'].astype(str)
-        for i in range(len(self.dfVenta['monto'])):
-            self.dfVenta['monto'][i]=self.dfVenta['monto'][i].replace('.',',')
+        dfVenta['monto'] = dfVenta['monto'].astype(str)
+        for i in range(len(dfVenta['monto'])):
+            dfVenta['monto'][i]=dfVenta['monto'][i].replace('.',',')
             
-        self.dfMonto = pd.merge(self.dfCompra.rename(columns={'monto': 'Intervención 20% Exportación Compra (USD)'}), self.dfVenta.rename(columns={'monto': 'Intervención 20% Exportación Venta (USD)'}), how='outer', right_on='mis', left_on='mis')
-            
-        self.dfVenta = self.dfVenta.assign(fecha = fecha)
-        self.dfCompra = self.dfCompra.assign(fecha = fecha)
+        return pd.merge(dfCompra.rename(columns={'monto': 'Intervención 20% Exportación Compra (USD)'}), dfVenta.rename(columns={'monto': 'Intervención 20% Exportación Venta (USD)'}), how='outer', right_on='mis', left_on='mis')
+        
+    
+    def get_usable(self):
+        df = self.df.assign(uso = 1)
+        df = df.rename(columns={'uso': 'Intervención 20% Exportación (USD)'})
+        
+        return df.groupby(['mis'], as_index=False).agg({'Intervención 20% Exportación (USD)': 'first'})
 
     def quitarCeros(self, rifCliente):
         aux = rifCliente

@@ -18,6 +18,7 @@ class linea_cir_load:
         self.df = self.df.rename(columns={self.df.columns[0]: 'estatus', self.df.columns[1]: 'mis', self.df.columns[2]: 'montoBs', self.df.columns[3]: 'montoDolar'})
         self.df['montoBs'] = self.df['montoBs'].astype(float)
         self.df['montoDolar'] = self.df['montoDolar'].astype(float)
+        self.df = self.df.groupby(['mis'], as_index=False).agg({'montoBs': sum, 'montoDolar': sum})
         
         print("CIR Bs total: ", self.df['montoBs'].sum())
         print("CIR dólar total: ", self.df['montoDolar'].sum(), "\n")
@@ -25,21 +26,35 @@ class linea_cir_load:
         self.df = pd.merge(self.df, cartera, how='inner', right_on='MisCliente', left_on='mis')
         
         self.dfBs = self.df.groupby(['mis'], as_index=False).agg({'montoBs': sum})
-        self.dfBs = self.dfBs.rename(columns={'montoBs': 'monto'})
-        self.dfBs['monto'] = self.dfBs['monto'].astype(str)
-        for i in range(len(self.dfBs['monto'])):
-            self.dfBs['monto'][i]=self.dfBs['monto'][i].replace('.',',')
-            
         self.dfDolar = self.df.groupby(['mis'], as_index=False).agg({'montoDolar': sum})
-        self.dfDolar = self.dfBs.rename(columns={'montoDolar': 'monto'})
-        self.dfDolar['monto'] = self.dfDolar['monto'].astype(str)
-        for i in range(len(self.dfDolar['monto'])):
-            self.dfDolar['monto'][i]=self.dfDolar['monto'][i].replace('.',',')
-            
-        self.dfMonto = pd.merge(self.dfBs.rename(columns={'monto': 'Línea/CIR Monto Vigente aprobado (Bs.)'}), self.dfDolar.rename(columns={'monto': 'Línea/CIR Monto Vigente aprobado (USD)'}), how='outer', right_on='mis', left_on='mis')
         
-        self.dfBs = self.dfBs.assign(fecha = self.fecha)
-        self.dfDolar = self.dfDolar.assign(fecha = self.fecha)
+        self.df = self.df.assign(fecha = self.fecha)
+        
+    def get_monto(self):
+        dfBs = self.dfBs.rename(columns={'montoBs': 'monto'})
+        dfBs = dfBs.groupby(['mis'], as_index=False).agg({'monto': sum})
+        dfBs['monto'] = dfBs['monto'].astype(str)
+        for i in range(len(dfBs['monto'])):
+            dfBs['monto'][i]=dfBs['monto'][i].replace('.',',')
+            
+        dfDolar = self.dfDolar.rename(columns={'montoDolar': 'monto'})
+        dfDolar = dfDolar.groupby(['mis'], as_index=False).agg({'monto': sum})
+        dfDolar['monto'] = dfDolar['monto'].astype(str)
+        for i in range(len(dfDolar['monto'])):
+            dfDolar['monto'][i]=dfDolar['monto'][i].replace('.',',')
+            
+        return pd.merge(dfBs.rename(columns={'monto': 'Línea/CIR Monto Vigente aprobado (Bs.)'}), dfDolar.rename(columns={'monto': 'Línea/CIR Monto Vigente aprobado (USD)'}), how='outer', right_on='mis', left_on='mis')
+    
+    def get_usable(self):
+        dfBs = self.dfBs.assign(uso = 1)
+        dfBs = dfBs.rename(columns={'uso': 'Línea/CIR Monto Vigente aprobado (Bs.)'})
+        dfBs = dfBs.groupby(['mis'], as_index=False).agg({'Línea/CIR Monto Vigente aprobado (Bs.)': sum})
+        
+        dfDolar = self.dfDolar.assign(uso = 1)
+        dfDolar = dfDolar.rename(columns={'uso': 'Línea/CIR Monto Vigente aprobado (USD)'})
+        dfDolar = dfDolar.groupby(['mis'], as_index=False).agg({'Línea/CIR Monto Vigente aprobado (USD)': sum})
+        
+        return pd.merge(dfBs, dfDolar, how='outer', right_on='mis', left_on='mis').groupby(['mis'], as_index=False).agg({'Línea/CIR Monto Vigente aprobado (Bs.)': sum, 'Línea/CIR Monto Vigente aprobado (USD)': sum})
     
     def to_csv(self):
         self.dfBs.to_csv(self.rutaOrigin + '\\rchivos csv\lineaBs.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)

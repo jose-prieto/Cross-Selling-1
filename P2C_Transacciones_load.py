@@ -20,13 +20,26 @@ class P2C_Transacciones_load:
         self.df = self.recorrerDF(self.df)
         self.df = pd.merge(self.df, cartera, how='inner', right_on='CedulaCliente', left_on='rif')
         self.df = self.df.groupby(['MisCliente'], as_index=False).agg({'monto': sum})
-        self.df['monto'] = self.df['monto'].astype(str)
-        for i in range(len(self.df['monto'])):
-            self.df['monto'][i]=self.df['monto'][i].replace('.',',')
             
-        self.dfMonto = self.df.rename(columns={'monto': 'P2C (Mensual)', "MisCliente": "mis"})
+        self.df = self.df.rename(columns={"MisCliente": "mis"})
         
         self.df = self.df.assign(fecha = fecha)
+        
+    def get_monto(self):
+        df = self.df
+        df['monto'] = df['monto'].astype(str)
+        for i in range(len(df['monto'])):
+            df['monto'][i]=df['monto'][i].replace('.',',')
+            
+        df = df.rename(columns={'monto': 'P2C (Mensual)'})
+        
+        return df.groupby(['mis'], as_index=False).agg({'P2C (Mensual)': 'first'})
+    
+    def get_usable(self):
+        df = self.df.assign(uso = 1)
+        df = df.rename(columns={'uso': 'P2C (Mensual)'})
+        
+        return df.groupby(['mis'], as_index=False).agg({'P2C (Mensual)': 'first'})
     
     def quitarCeros(self, rifCliente):
         aux = rifCliente

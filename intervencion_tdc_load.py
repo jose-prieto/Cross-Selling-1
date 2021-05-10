@@ -9,33 +9,32 @@ class intervencion_tdc_load:
         self.ruta = ruta
         input("Vacíe la información necesaria en el archivo de excel llamado 'intervencion_tdc_llenar.xlsx' recién creado en la ruta:\n\n" + ruta + "\n\nluego presione Enter")
         print("Creando intervencion tdc\n")
-        self.df = pd.read_excel(self.ruta + '\intervencion_tdc_llenar.xlsx', usecols = 'A:C', header=0, index_col=False, keep_default_na=True, dtype=str)
-        self.df['montoCompra'] = self.df['montoCompra'].astype(float)
+        self.df = pd.read_excel(self.ruta + '\intervencion_tdc_llenar.xlsx', usecols = 'A,B', header=0, index_col=False, keep_default_na=True, dtype=str)
         self.df['montoVenta'] = self.df['montoVenta'].astype(float)
         
-        print("Intervención tdc compra: ", self.df['montoCompra'].sum())
         print("Intervención tdc venta: ", self.df['montoVenta'].sum(), "\n")
         
         self.df = self.recorrerDF(self.df)
         self.df = pd.merge(self.df, cartera, how='inner', right_on='CedulaCliente', left_on='rif')
-        self.df = self.df.rename(columns={'MisCliente': 'mis'})
+        self.df = self.df.rename(columns={'MisCliente': 'mis', 'montoVenta': 'monto'})
+        self.df = self.df.groupby(['mis'], as_index=False).agg({'monto': sum})
+            
+        self.df = self.df.assign(fecha = fecha)
         
-        self.dfCompra = self.df.groupby(['mis'], as_index=False).agg({'montoCompra': sum})
-        self.dfCompra = self.dfCompra.rename(columns={'montoCompra': 'monto'})
-        self.dfCompra['monto'] = self.dfCompra['monto'].astype(str)
-        for i in range(len(self.dfCompra['monto'])):
-            self.dfCompra['monto'][i]=self.dfCompra['monto'][i].replace('.',',')
+    def get_monto(self):
+        df = self.df.groupby(['mis'], as_index=False).agg({'monto': sum})
+        df['monto'] = df['monto'].astype(str)
+        for i in range(len(df['monto'])):
+            df['monto'][i]=df['monto'][i].replace('.',',')
             
-        self.dfVenta = self.df.groupby(['mis'], as_index=False).agg({'montoVenta': sum})
-        self.dfVenta = self.dfVenta.rename(columns={'montoVenta': 'monto'})
-        self.dfVenta['monto'] = self.dfVenta['monto'].astype(str)
-        for i in range(len(self.dfVenta['monto'])):
-            self.dfVenta['monto'][i]=self.dfVenta['monto'][i].replace('.',',')
-            
-        self.dfMonto = pd.merge(self.dfCompra.rename(columns={'monto': 'Intervención TDC Compra'}), self.dfVenta.rename(columns={'monto': 'Intervención TDC Venta'}), how='outer', right_on='mis', left_on='mis')
-            
-        self.dfVenta = self.dfVenta.assign(fecha = fecha)
-        self.dfCompra = self.dfCompra.assign(fecha = fecha)
+        return df.rename(columns={'monto': 'Intervención TDC Venta'})
+        
+    
+    def get_usable(self):
+        df = self.df.assign(uso = 1)
+        df = df.rename(columns={'uso': 'Intervención TDC Venta'})
+        
+        return df.groupby(['mis'], as_index=False).agg({'Intervención TDC Venta': 'first'})
 
     def quitarCeros(self, rifCliente):
         aux = rifCliente

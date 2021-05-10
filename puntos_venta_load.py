@@ -19,13 +19,24 @@ class puntos_venta_load:
         
         self.df = pd.merge(self.df, cartera, how='inner', right_on='MisCliente', left_on='mis')
         self.df = self.df.groupby(['mis'], as_index=False).agg({'monto': sum})
-        self.df['monto'] = self.df['monto'].astype(str)
-        for i in range(len(self.df['monto'])):
-            self.df['monto'][i]=self.df['monto'][i].replace('.',',')
-            
-        self.dfMonto = self.df.rename(columns={'monto': 'Puntos de Venta'})
             
         self.df = self.df.assign(fecha = fecha)
+        
+    def get_monto(self):
+        df = self.df
+        df['monto'] = df['monto'].astype(str)
+        for i in range(len(df['monto'])):
+            df['monto'][i]=df['monto'][i].replace('.',',')
+            
+        df = df.rename(columns={'monto': 'Puntos de Venta'})
+        
+        return df.groupby(['mis'], as_index=False).agg({'Puntos de Venta': 'first'})
+    
+    def get_usable(self):
+        df = self.df.assign(uso = 1)
+        df = df.rename(columns={'uso': 'Puntos de Venta'})
+        
+        return df.groupby(['mis'], as_index=False).agg({'Puntos de Venta': 'first'})
     
     def to_csv(self):
         self.df.to_csv(self.rutaOrigin + '\\rchivos csv\\puntos_de_venta.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)

@@ -21,9 +21,13 @@ class ivr_conexion_load:
         self.df = self.df.groupby(['MisCliente'], as_index=False).agg({'MisCliente': 'first'})
         self.df = self.df.rename(columns={'MisCliente': 'mis'})
         
-        self.dfMonto = self.df.assign(Conexión=1)
-        
         self.df = self.df.assign(fecha = fecha)
+        
+    def get_usable(self):
+        df = self.df.assign(uso = 1)
+        df = df.rename(columns={'uso': 'Conexión'})
+        
+        return df.groupby(['mis'], as_index=False).agg({'Conexión': 'first'})
         
     def quitarCeros(self, rifCliente):
         aux = rifCliente

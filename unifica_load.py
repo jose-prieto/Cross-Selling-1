@@ -15,25 +15,33 @@ class unifica_load:
         self.cc_unifica = cc_unifica_load(ruta, cartera)
         self.ah_unifica = ah_unifica_load(ruta, cartera)
         self.dfBs = pd.concat([self.cc_unifica.dfBs, self.ah_unifica.dfBs]).groupby(['mis']).sum().reset_index()
+        self.dfBs = self.dfBs.assign(fecha = self.fecha)
         
         self.dfDolar = pd.concat([self.cc_unifica.dfDolar, self.ah_unifica.dfDolar]).groupby(['mis']).sum().reset_index()
+        self.dfDolar = self.dfDolar.assign(fecha = self.fecha)
         
         self.dfEuro = self.cc_unifica.dfEuro
-        
-        self.dfBs = self.dfBs.assign(fecha = self.fecha)
-        self.dfDolar = self.dfDolar.assign(fecha = self.fecha)
         self.dfEuro = self.dfEuro.assign(fecha = self.fecha)
         
-    def get_monto(self):
+        self.dfEuro['monto'] = self.dfEuro['monto'].astype(float)
+        self.dfDolar['monto'] = self.dfDolar['monto'].astype(float)
+        self.dfBs['monto'] = self.dfBs['monto'].astype(float)
+        
         print("corriente ahorro total: ", self.dfBs['monto'].sum())
         print("convenio 20 / convenio 1 total: ", self.dfDolar['monto'].sum())
         print("Cuenta en Euros total: ", self.dfEuro['monto'].sum(), "\n")
         
+    def get_monto(self):
         dfEuro = self.dfEuro
-        dfDolar = self.dfDolar
-        dfBs = self.dfBs
+        dfEuro = dfEuro.groupby(['mis'], as_index=False).agg({'monto': sum})
         dfEuro['monto'] = self.dfEuro['monto'].astype(str)
+        
+        dfDolar = self.dfDolar
+        dfDolar = dfDolar.groupby(['mis'], as_index=False).agg({'monto': sum})
         dfDolar['monto'] = self.dfDolar['monto'].astype(str)
+        
+        dfBs = self.dfBs
+        dfBs = dfBs.groupby(['mis'], as_index=False).agg({'monto': sum})
         dfBs['monto'] = self.dfBs['monto'].astype(str)
         
         for i in range(len(dfBs['monto'])):
@@ -45,10 +53,30 @@ class unifica_load:
         for i in range(len(dfEuro['monto'])):
             dfEuro['monto'][i]=dfEuro['monto'][i].replace('.',',')
         
-        dfMonto = pd.merge(self.dfBs.rename(columns={'monto': 'Corriente/Ahorro'}), 
-                           self.dfDolar.rename(columns={'monto': 'Convenio 20 / Convenio 1'}), 
+        dfMonto = pd.merge(dfBs.rename(columns={'monto': 'Corriente/Ahorro'}), 
+                           dfDolar.rename(columns={'monto': 'Convenio 20 / Convenio 1'}), 
                            how='outer', right_on='mis', left_on='mis')
-        return pd.merge(dfMonto, self.dfEuro.rename(columns={'monto': 'Cuenta en Euros'}), 
+        return pd.merge(dfMonto, dfEuro.rename(columns={'monto': 'Cuenta en Euros'}), 
+                        how='outer', right_on='mis', left_on='mis')
+    
+    def get_usable(self):
+        dfBs = self.dfBs.assign(uso = 1)
+        dfBs = dfBs.rename(columns={'uso': 'Corriente/Ahorro'})
+        dfBs = dfBs.groupby(['mis'], as_index=False).agg({'Corriente/Ahorro': 'first'})
+        
+        dfDolar = self.dfDolar.assign(uso = 1)
+        dfDolar = dfDolar.rename(columns={'uso': 'Convenio 20 / Convenio 1'})
+        dfDolar = dfDolar.groupby(['mis'], as_index=False).agg({'Convenio 20 / Convenio 1': 'first'})
+        
+        dfEuro = self.dfEuro.assign(uso = 1)
+        dfEuro = dfEuro.rename(columns={'uso': 'Cuenta en Euros'})
+        dfEuro = dfEuro.groupby(['mis'], as_index=False).agg({'Cuenta en Euros': 'first'})
+        
+        df = pd.merge(dfBs.rename(columns={'uso': 'Corriente/Ahorro'}), 
+                           dfDolar.rename(columns={'uso': 'Convenio 20 / Convenio 1'}), 
+                           how='outer', right_on='mis', left_on='mis')
+        
+        return pd.merge(df, dfEuro.rename(columns={'uso': 'Cuenta en Euros'}), 
                         how='outer', right_on='mis', left_on='mis')
     
     def insertDf(self):
