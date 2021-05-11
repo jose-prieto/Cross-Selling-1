@@ -44,14 +44,14 @@ class inventario_ajustado_load:
         dfDolar = self.dfDolar.groupby(['mis'], as_index=False).agg({'monto': sum})
         dfDolar = dfDolar.assign(uso = 1)
         dfDolar = dfDolar.rename(columns={'uso': 'Crédito en Moneda Extranjera USD'})
-        dfDolar = dfDolar.groupby(['mis'], as_index=False).agg({'Crédito en Moneda Extranjera USD': sum})
+        dfDolar = dfDolar.groupby(['mis'], as_index=False).agg({'Crédito en Moneda Extranjera USD': 'first'})
         
         dfBs = self.dfBs.groupby(['mis'], as_index=False).agg({'monto': sum})
         dfBs = dfBs.assign(uso = 1)
         dfBs = dfBs.rename(columns={'uso': 'Crédito Vigente'})
-        dfBs = dfBs.groupby(['mis'], as_index=False).agg({'Crédito Vigente': sum})
+        dfBs = dfBs.groupby(['mis'], as_index=False).agg({'Crédito Vigente': 'first'})
         
-        return pd.merge(dfBs, dfDolar, how='inner', right_on='mis', left_on='mis')
+        return pd.merge(dfBs, dfDolar, how='outer', right_on='mis', left_on='mis')
     
     def to_csv(self):
         self.dfDolar.to_csv(self.rutaOrigin + '\\rchivos csv\credito_dolar.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)

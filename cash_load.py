@@ -26,8 +26,8 @@ class cash_load:
         self.dfdom = dom_load(ruta, cartera, fecha).df
         
         self.dfEdi = pd.concat([edi_dom_load(ruta, cartera, fecha).df, 
-                                edi_nom_load(ruta, cartera, fecha).df], 
-                                edi_pap_load(ruta, cartera, fecha).df).groupby(['mis']).sum().reset_index()
+                                edi_nom_load(ruta, cartera, fecha).df, 
+                                edi_pap_load(ruta, cartera, fecha).df]).groupby(['mis']).sum().reset_index()
         """self.dfedidom = edi_dom_load(ruta, cartera, fecha).df
         self.dfedinom = edi_nom_load(ruta, cartera, fecha).df
         self.dfedipap = edi_pap_load(ruta, cartera, fecha).df"""

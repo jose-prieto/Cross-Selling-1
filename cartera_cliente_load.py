@@ -14,7 +14,7 @@ class cartera_cliente_load:
         for file in gb.glob(ruta + self.nombre_archivo + '*.accdb'):
             self.ruta = file
         self.conn = pdbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=' + self.ruta)
-        self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "Segmento Mis", "Unidad De Negocio", "Region", "Tipo_Atencion", "Nombre del Responsable" FROM ' + db + ' WHERE "Tipo de Persona" = ?', self.conn, params=["PJ"])
+        self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "Segmento Mis", "Unidad De Negocio", "Region", "Nombre del Responsable" FROM ' + db + ' WHERE "Tipo de Persona" = ?', self.conn, params=["PJ"])
         self.df['CedulaCliente'] = self.df['CedulaCliente'].str.strip()
         self.df = self.recorrerDF(self.df)
         self.df['MisCliente'] = self.df['MisCliente'].astype(str)

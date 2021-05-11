@@ -13,7 +13,7 @@ class tdc_juridica_load:
         self.nombre_archivo = '\\Maestro de Tarjetas Clientes'
         for file in gb.glob(self.ruta + self.nombre_archivo + '*.xlsx'):
             self.ruta = file
-        self.df = pd.read_excel(self.ruta, usecols = 'B', header=0, sheet_name = "TDC ACTIVAS", index_col=False, keep_default_na=True, dtype=str)
+        self.df = pd.read_excel(self.ruta, usecols = 'B', header=0, sheet_name = "TDC ACTIVAS JURIDICAS", index_col=False, keep_default_na=True, dtype=str)
         self.df = self.df.rename(columns={"Codigo cliente": 'mis'})
         print("conexiones totales: ", len(self.df.index))
         

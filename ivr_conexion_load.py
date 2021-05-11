@@ -16,6 +16,7 @@ class ivr_conexion_load:
         print("conexiones totales: ", len(self.df.index))
         
         self.df = self.df.rename(columns={'cedula': 'rif'})
+        self.df['rif'] = self.df['rif'].str.strip()
         self.df = self.recorrerDF(self.df)
         self.df = pd.merge(self.df, cartera, how='inner', right_on='CedulaCliente', left_on='rif')
         self.df = self.df.groupby(['MisCliente'], as_index=False).agg({'MisCliente': 'first'})
@@ -30,9 +31,6 @@ class ivr_conexion_load:
         return df.groupby(['mis'], as_index=False).agg({'Conexión': 'first'})
         
     def quitarCeros(self, rifCliente):
-        aux = rifCliente
-        while (rifCliente[0] == " "):
-            aux = rifCliente[1:]
         aux = rifCliente[1:]
         while (len(aux) < 9):
             aux = '0' + aux
