@@ -11,6 +11,7 @@ class intervencion_tdc_load:
         print("Creando intervencion tdc\n")
         self.df = pd.read_excel(self.ruta + '\intervencion_tdc_llenar.xlsx', usecols = 'A,B', header=0, index_col=False, keep_default_na=True, dtype=str)
         self.df['montoVenta'] = self.df['montoVenta'].astype(float)
+        self.df['rif'] = self.df['rif'].str.strip()
         
         print("Intervención tdc venta: ", self.df['montoVenta'].sum(), "\n")
         
@@ -37,9 +38,6 @@ class intervencion_tdc_load:
         return df.groupby(['mis'], as_index=False).agg({'Intervención TDC Venta': 'first'})
 
     def quitarCeros(self, rifCliente):
-        aux = rifCliente
-        while (rifCliente[0] == " "):
-            aux = rifCliente[1:]
         aux = rifCliente[1:]
         while (len(aux) < 9):
             aux = '0' + aux
@@ -52,7 +50,7 @@ class intervencion_tdc_load:
         
     def crear_excel(self, ruta):
         writer = pd.ExcelWriter(ruta + '\intervencion_tdc_llenar.xlsx')
-        df = pd.DataFrame(columns = ['rif', 'montoCompra', 'montoVenta'])
+        df = pd.DataFrame(columns = ['rif', 'montoVenta'])
         df.to_excel(writer, index=False)
         writer.save()
     

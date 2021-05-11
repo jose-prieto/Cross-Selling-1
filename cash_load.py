@@ -24,9 +24,13 @@ class cash_load:
         self.dfpet = pet_load(ruta, cartera, fecha).df
         self.dfppt = ppt_load(ruta, cartera, fecha).df
         self.dfdom = dom_load(ruta, cartera, fecha).df
-        self.dfedidom = edi_dom_load(ruta, cartera, fecha).df
+        
+        self.dfEdi = pd.concat([edi_dom_load(ruta, cartera, fecha).df, 
+                                edi_nom_load(ruta, cartera, fecha).df], 
+                                edi_pap_load(ruta, cartera, fecha).df).groupby(['mis']).sum().reset_index()
+        """self.dfedidom = edi_dom_load(ruta, cartera, fecha).df
         self.dfedinom = edi_nom_load(ruta, cartera, fecha).df
-        self.dfedipap = edi_pap_load(ruta, cartera, fecha).df
+        self.dfedipap = edi_pap_load(ruta, cartera, fecha).df"""
         
         self.dfPap = self.dfPap.assign(fecha = fecha)
         self.dfnom = self.dfnom.assign(fecha = fecha)
@@ -34,9 +38,10 @@ class cash_load:
         self.dfpet = self.dfpet.assign(fecha = fecha)
         self.dfppt = self.dfppt.assign(fecha = fecha)
         self.dfdom = self.dfdom.assign(fecha = fecha)
-        self.dfedidom = self.dfedidom.assign(fecha = fecha)
+        self.dfEdi = self.dfEdi.assign(fecha = fecha)
+        """self.dfedidom = self.dfedidom.assign(fecha = fecha)
         self.dfedinom = self.dfedinom.assign(fecha = fecha)
-        self.dfedipap = self.dfedipap.assign(fecha = fecha)
+        self.dfedipap = self.dfedipap.assign(fecha = fecha)"""
         
     def get_monto(self):
         dfPap = self.dfPap.groupby(['mis'], as_index=False).agg({'mis': 'first', 'monto': sum})
@@ -94,11 +99,15 @@ class cash_load:
         dfdom = self.dfdom.assign(uso = 1)
         dfdom = dfdom.rename(columns={'uso': 'Domiciliación'}).groupby(['mis'], as_index=False).agg({'Domiciliación': 'first'})
         
+        dfEdi = self.dfEdi.assign(uso = 1)
+        dfEdi = dfEdi.rename(columns={'uso': 'EDI'}).groupby(['mis'], as_index=False).agg({'EDI': 'first'})
+        
         dfMonto = pd.merge(dfPap, dfnom, how='outer', right_on='mis', left_on='mis')
         dfMonto = pd.merge(dfMonto, dfdedicheq, how='outer', right_on='mis', left_on='mis')
         dfMonto = pd.merge(dfMonto, dfpet, how='outer', right_on='mis', left_on='mis')
         dfMonto = pd.merge(dfMonto, dfppt, how='outer', right_on='mis', left_on='mis')
-        return pd.merge(dfMonto, dfdom, how='outer', right_on='mis', left_on='mis').groupby(['mis'], as_index=False).agg({'Pagos a Proveedores': 'first', 'Nómina': 'first', 'Dedicheq': 'first', 'Pagos Especiales a Terceros': 'first', 'Pagos por Taquilla': 'first', 'Domiciliación': 'first'})
+        dfMonto = pd.merge(dfMonto, dfdom, how='outer', right_on='mis', left_on='mis')
+        return pd.merge(dfMonto, dfEdi, how='outer', right_on='mis', left_on='mis').groupby(['mis'], as_index=False).agg({'Pagos a Proveedores': 'first', 'Nómina': 'first', 'Dedicheq': 'first', 'Pagos Especiales a Terceros': 'first', 'Pagos por Taquilla': 'first', 'Domiciliación': 'first', 'EDI': 'first'})
         
     def crear_excel(self, ruta):
         writer = pd.ExcelWriter(ruta + '\cash_llena.xlsx')

@@ -17,8 +17,8 @@ class controlador:
         self.custodia = self.cargaDatos.custodia()
         self.inventario = self.cargaDatos.inventario()
         self.linea_cir = self.cargaDatos.linea_cir()
-        self.tdc_juridica = self.cargaDatos.tdc_juridica()
-        self.cash = self.cargaDatos.cash()
+        #self.tdc_juridica = self.cargaDatos.tdc_juridica()
+        #self.cash = self.cargaDatos.cash()
         self.puntos_venta = self.cargaDatos.puntos_venta()
         self.ivr_conexion = self.cargaDatos.ivr_conexion()
         self.p2c = self.cargaDatos.p2c()
@@ -40,7 +40,7 @@ class controlador:
         carteraMonto = pd.merge(carteraMonto, self.custodia.get_monto(), how='outer', left_on='mis', right_on='mis')
         carteraMonto = pd.merge(carteraMonto, self.inventario.get_monto(), how='outer', left_on='mis', right_on='mis')
         carteraMonto = pd.merge(carteraMonto, self.linea_cir.get_monto(), how='outer', left_on='mis', right_on='mis')
-        carteraMonto = pd.merge(carteraMonto, self.cash.get_monto(), how='outer', left_on='mis', right_on='mis')
+        #carteraMonto = pd.merge(carteraMonto, self.cash.get_monto(), how='outer', left_on='mis', right_on='mis')
         carteraMonto = pd.merge(carteraMonto, self.puntos_venta.get_monto(), how='outer', left_on='mis', right_on='mis')
         carteraMonto = pd.merge(carteraMonto, self.p2c.get_monto(), how='outer', left_on='mis', right_on='mis')
         return carteraMonto
@@ -54,8 +54,8 @@ class controlador:
         carteraMonto = pd.merge(carteraMonto, self.custodia.get_usable(), how='outer', left_on='mis', right_on='mis')
         carteraMonto = pd.merge(carteraMonto, self.inventario.get_usable(), how='outer', left_on='mis', right_on='mis')
         carteraMonto = pd.merge(carteraMonto, self.linea_cir.get_usable(), how='outer', left_on='mis', right_on='mis')
-        carteraMonto = pd.merge(carteraMonto, self.tdc_juridica.get_usable(), how='outer', left_on='mis', right_on='mis')
-        carteraMonto = pd.merge(carteraMonto, self.cash.get_usable(), how='outer', left_on='mis', right_on='mis')
+        #carteraMonto = pd.merge(carteraMonto, self.tdc_juridica.get_usable(), how='outer', left_on='mis', right_on='mis')
+        #carteraMonto = pd.merge(carteraMonto, self.cash.get_usable(), how='outer', left_on='mis', right_on='mis')
         carteraMonto = pd.merge(carteraMonto, self.puntos_venta.get_usable(), how='outer', left_on='mis', right_on='mis')
         carteraMonto = pd.merge(carteraMonto, self.ivr_conexion.get_usable(), how='outer', left_on='mis', right_on='mis')
         carteraMonto = pd.merge(carteraMonto, self.p2c.get_usable(), how='outer', left_on='mis', right_on='mis')
@@ -63,8 +63,8 @@ class controlador:
         
     def crear_excel(self):
         print("Creando excel")
-        clientes = pd.merge(self.cargaDatos.cartera.df, self.crear_cartera_clientes(), how='inner', left_on='MisCliente', right_on='mis')
-        montos = pd.merge(self.cargaDatos.cartera.df, self.crear_cartera_montos(), how='inner', left_on='MisCliente', right_on='mis')
+        clientes = pd.merge(self.cargaDatos.cartera.df, self.crear_cartera_clientes(), how='inner', left_on='MisCliente', right_on='mis').fillna(0)
+        montos = pd.merge(self.cargaDatos.cartera.df, self.crear_cartera_montos(), how='inner', left_on='MisCliente', right_on='mis').fillna(0)
         
         writer = pd.ExcelWriter(self.ruta + '\Cross-Selling-Enero-2021.xlsx')
         
@@ -83,7 +83,7 @@ class controlador:
         self.custodia.insertDf()
         
     #Dirección en pc de archivos fuente, dirección de base de datos destino, nombre de la tabla dentro de la cartera clientes y fecha a asignar a cada registro.
-contro = controlador(r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Enero', r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Cross Selling', "Cartera_Clientes_Enero_2020", '29/01/2021')
+contro = controlador(r'C:\Users\José Prieto\Documents\Bancaribe\Abril', r'C:\Users\José Prieto\Documents\Bancaribe\Cross Selling', "Cartera_Clientes_Abril_2021", '30/04/2021')
 df = contro.cargaDatos.cartera.df
 contro.crear_excel()
 

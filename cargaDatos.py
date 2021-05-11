@@ -20,7 +20,7 @@ class cargaDatos:
         self.rutadb = rutadb + '\CROSS_SELLING_JURIDICO.accdb'
         self.ruta = ruta
         self.fecha = fecha
-        self.cartera = cartera_cliente_load(self.ruta, self.rutadb, db)
+        self.cartera = cartera_cliente_load(self.ruta, self.rutadb, db, fecha)
     
     def unifica(self):
         return unifica_load(self.ruta, self.rutadb, self.cartera.df, self.fecha)

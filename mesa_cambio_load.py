@@ -14,7 +14,7 @@ class mesa_cambio_load:
         self.df['montoVenta'] = self.df['montoVenta'].astype(float)
         print("Mesa de cabio compra monto: ", self.df['montoCompra'].sum())
         print("Mesa de cabio venta monto: ", self.df['montoVenta'].sum())
-        
+        self.df['rif'] = self.df['rif'].str.strip()
         self.df = self.recorrerDF(self.df)
         self.df = pd.merge(self.df, cartera, how='inner', right_on='CedulaCliente', left_on='rif')
         self.df = self.df.rename(columns={'MisCliente': 'mis'})
@@ -47,9 +47,6 @@ class mesa_cambio_load:
         return df.groupby(['mis'], as_index=False).agg({'Mesa de Cambio (USD)': 'first'})
 
     def quitarCeros(self, rifCliente):
-        aux = rifCliente
-        while (rifCliente[0] == " "):
-            aux = rifCliente[1:]
         aux = rifCliente[1:]
         while (len(aux) < 9):
             aux = '0' + aux

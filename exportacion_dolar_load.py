@@ -12,6 +12,7 @@ class exportacion_dolar_load:
         self.df = pd.read_excel(self.ruta + '\exportacion_dolar.xlsx', usecols = 'A:C', header=0, index_col=False, keep_default_na=True, dtype=str)
         self.df['montoCompra'] = self.df['montoCompra'].astype(float)
         self.df['montoVenta'] = self.df['montoVenta'].astype(float)
+        self.df['rif'] = self.df['rif'].str.strip()
         
         print("Exportación dólar compra: ", self.df['montoCompra'].sum())
         print("Exportación dólar venta: ", self.df['montoVenta'].sum(), "\n")
@@ -48,9 +49,6 @@ class exportacion_dolar_load:
         return df.groupby(['mis'], as_index=False).agg({'Intervención 20% Exportación (USD)': 'first'})
 
     def quitarCeros(self, rifCliente):
-        aux = rifCliente
-        while (rifCliente[0] == " "):
-            aux = rifCliente[1:]
         aux = rifCliente[1:]
         while (len(aux) < 9):
             aux = '0' + aux

@@ -6,7 +6,7 @@ import csv
 class cartera_cliente_load:
     
     #Constructor
-    def __init__(self, ruta, rutadb, db):
+    def __init__(self, ruta, rutadb, db, fecha):
         print("Creando cartera")
         self.rutadb = rutadb
         self.nombre_archivo = '\Cartera_Cliente'
@@ -14,15 +14,14 @@ class cartera_cliente_load:
         for file in gb.glob(ruta + self.nombre_archivo + '*.accdb'):
             self.ruta = file
         self.conn = pdbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=' + self.ruta)
-        self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "Segmento Mis", "Unidad De Negocio", "Region", "Tipo_Atencion" FROM ' + db + ' WHERE "Tipo de Persona" = ?', self.conn, params=["PJ"])
-        self.dfaux = self.df
+        self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "Segmento Mis", "Unidad De Negocio", "Region", "Tipo_Atencion", "Nombre del Responsable" FROM ' + db + ' WHERE "Tipo de Persona" = ?', self.conn, params=["PJ"])
+        self.df['CedulaCliente'] = self.df['CedulaCliente'].str.strip()
         self.df = self.recorrerDF(self.df)
         self.df['MisCliente'] = self.df['MisCliente'].astype(str)
+        
+        self.df = self.df.assign(fecha = fecha)
 
     def quitarCeros(self, rifCliente):
-        aux = rifCliente
-        while (rifCliente[0] == " "):
-            aux = rifCliente[1:]
         aux = rifCliente[1:]
         while (len(aux) < 9):
             aux = '0' + aux
@@ -49,7 +48,8 @@ class cartera_cliente_load:
                                    fila["Segmento Mis"], 
                                    fila["Unidad De Negocio"], 
                                    fila["Region"], 
-                                   fila["Tipo_Atencion"])
+                                   fila["Tipo_Atencion"],
+                                   fila["Nombre del Responsable"])
                 except KeyError as llave:
                     print(type(llave))
                     print(llave.args)
