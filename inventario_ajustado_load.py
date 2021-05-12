@@ -14,6 +14,7 @@ class inventario_ajustado_load:
         for file in gb.glob(self.ruta + self.nombre_archivo + '*.xlsx'):
             self.ruta = file
         self.df = pd.read_excel(self.ruta, usecols = 'A:AJ', header=0, index_col=False, keep_default_na=True, sheet_name="INVENTARIO_DEL_DÍA", dtype=str)
+        self.df['CI O RIF'] = self.df['CI O RIF'].str.strip()
         self.df = self.df[(self.df["CI O RIF"].str.startswith(("J", "R", "G", "F")))]
         self.df = self.df.rename(columns={'MIS': 'mis', 'VIGENTE': 'monto'})
         self.df['monto'] = self.df['monto'].astype(float)

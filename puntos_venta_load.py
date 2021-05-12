@@ -16,6 +16,7 @@ class puntos_venta_load:
         self.df = self.df.rename(columns={"Mis": 'mis', "Mto del Mes": "monto"})
         self.df['monto'] = self.df['monto'].astype(float)
         print("Puntos de venta total: ", self.df['monto'].sum())
+        print("\n")
         
         self.df = pd.merge(self.df, cartera, how='inner', right_on='MisCliente', left_on='mis')
         self.df = self.df.groupby(['mis'], as_index=False).agg({'monto': sum})
