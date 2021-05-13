@@ -14,8 +14,8 @@ class linea_cir_load:
         for file in gb.glob(self.ruta + self.nombre_archivo + '*.xlsx'):
             self.ruta = file
         self.df = pd.read_excel(self.ruta, usecols = 'G,J,R,V', header=0, sheet_name = "CONSOLIDADO", index_col=False, skiprows=11, keep_default_na=True, dtype=str)
-        self.df = self.df[(self.df["ESTATUS"] == "VIGENTE")]
         self.df = self.df.rename(columns={self.df.columns[0]: 'estatus', self.df.columns[1]: 'mis', self.df.columns[2]: 'montoBs', self.df.columns[3]: 'montoDolar'})
+        self.df = self.df[(self.df["estatus"] == "VIGENTE")]
         self.df['montoBs'] = self.df['montoBs'].astype(float)
         self.df['montoDolar'] = self.df['montoDolar'].astype(float)
         self.df = self.df.groupby(['mis'], as_index=False).agg({'montoBs': sum, 'montoDolar': sum})
@@ -27,8 +27,11 @@ class linea_cir_load:
         
         self.dfBs = self.df.groupby(['mis'], as_index=False).agg({'montoBs': sum})
         self.dfDolar = self.df.groupby(['mis'], as_index=False).agg({'montoDolar': sum})
+        self.dfBs = self.dfBs[(self.dfBs["montoBs"] != 0)]
+        self.dfDolar = self.dfDolar[(self.dfDolar["montoDolar"] != 0)]
         
-        self.df = self.df.assign(fecha = self.fecha)
+        self.dfBs = self.dfBs.assign(fecha = self.fecha)
+        self.dfDolar = self.dfDolar.assign(fecha = self.fecha)
         
     def get_monto(self):
         dfBs = self.dfBs.rename(columns={'montoBs': 'monto'})

@@ -18,16 +18,19 @@ class cash_load:
         self.crear_excel(ruta)
         input("Vacíe la información necesaria en el archivo de excel recién creado 'cash_llena.xlsx' en la ruta:\n\n" + ruta + "\n\ny luego presione Enter")
         self.ruta = ruta
-        self.dfPap = pap_load(ruta, cartera, fecha).df
-        self.dfnom = nom_load(ruta, cartera, fecha).df
-        self.dfdedicheq = dedicheq_load(ruta, cartera, fecha).df
-        self.dfpet = pet_load(ruta, cartera, fecha).df
-        self.dfppt = ppt_load(ruta, cartera, fecha).df
-        self.dfdom = dom_load(ruta, cartera, fecha).df
+        self.dfPap = pd.concat([pap_load(ruta, cartera, fecha).df.dropna(axis=0, how='any'), 
+                                edi_pap_load(ruta, cartera, fecha).df.dropna(axis=0, how='any')]).groupby(['mis']).sum().reset_index()
+        self.dfnom = pd.concat([nom_load(ruta, cartera, fecha).df.dropna(axis=0, how='any'), 
+                                edi_nom_load(ruta, cartera, fecha).df.dropna(axis=0, how='any')]).groupby(['mis']).sum().reset_index()
+        self.dfdedicheq = dedicheq_load(ruta, cartera, fecha).df.dropna(axis=0, how='any')
+        self.dfpet = pet_load(ruta, cartera, fecha).df.dropna(axis=0, how='any')
+        self.dfppt = ppt_load(ruta, cartera, fecha).df.dropna(axis=0, how='any')
+        self.dfdom = pd.concat([dom_load(ruta, cartera, fecha).df.dropna(axis=0, how='any'), 
+                                edi_dom_load(ruta, cartera, fecha).df.dropna(axis=0, how='any')]).groupby(['mis']).sum().reset_index()
         
         self.dfEdi = pd.concat([edi_dom_load(ruta, cartera, fecha).df, 
                                 edi_nom_load(ruta, cartera, fecha).df, 
-                                edi_pap_load(ruta, cartera, fecha).df]).groupby(['mis']).sum().reset_index()
+                                edi_pap_load(ruta, cartera, fecha).df]).groupby(['mis']).sum().reset_index().dropna(axis=0, how='any')
         """self.dfedidom = edi_dom_load(ruta, cartera, fecha).df
         self.dfedinom = edi_nom_load(ruta, cartera, fecha).df
         self.dfedipap = edi_pap_load(ruta, cartera, fecha).df"""
