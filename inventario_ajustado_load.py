@@ -28,6 +28,7 @@ class inventario_ajustado_load:
         
     def get_monto(self):
         dfDolar = self.dfDolar.groupby(['mis'], as_index=False).agg({'monto': sum})
+        dfDolar['monto'] = dfDolar['monto'].div(2815815)
         print("inventario Dolar: ", dfDolar['monto'].sum())
         dfDolar['monto'] = dfDolar['monto'].astype(str)
         for i in range(len(dfDolar['monto'])):

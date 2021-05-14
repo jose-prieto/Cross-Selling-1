@@ -97,7 +97,7 @@ class controlador:
         self.custodia.insertDf()
         
     #Dirección en pc de archivos fuente, dirección de base de datos destino, nombre de la tabla dentro de la cartera clientes y fecha a asignar a cada registro.
-contro = controlador(r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Abril', r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Cross Selling', "Cartera_Clientes_Abril_2021", '30/04/2021')
+contro = controlador(r'C:\Users\José Prieto\Documents\Bancaribe\Abril', r'C:\Users\José Prieto\Documents\Bancaribe\Cross Selling', "Cartera_Clientes_Abril_2021", '30/04/2021')
 df = contro.cargaDatos.cartera.df
 contro.crear_excel()
 
