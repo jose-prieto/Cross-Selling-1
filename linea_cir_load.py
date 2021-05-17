@@ -18,7 +18,6 @@ class linea_cir_load:
         self.df = self.df[(self.df["estatus"] == "VIGENTE")]
         self.df['montoBs'] = self.df['montoBs'].astype(float)
         self.df['montoDolar'] = self.df['montoDolar'].astype(float)
-        self.df = self.df.groupby(['mis'], as_index=False).agg({'montoBs': sum, 'montoDolar': sum})
         
         print("CIR Bs total: ", self.df['montoBs'].sum())
         print("CIR dólar total: ", self.df['montoDolar'].sum(), "\n")
@@ -27,8 +26,8 @@ class linea_cir_load:
         
         self.dfBs = self.df.groupby(['mis'], as_index=False).agg({'montoBs': sum})
         self.dfDolar = self.df.groupby(['mis'], as_index=False).agg({'montoDolar': sum})
-        self.dfBs = self.dfBs[(self.dfBs["montoBs"] != 0)]
-        self.dfDolar = self.dfDolar[(self.dfDolar["montoDolar"] != 0)]
+        self.dfBs = self.dfBs[(self.dfBs["montoBs"] > 0)]
+        self.dfDolar = self.dfDolar[(self.dfDolar["montoDolar"] > 0)]
         
         self.dfBs = self.dfBs.assign(fecha = self.fecha)
         self.dfDolar = self.dfDolar.assign(fecha = self.fecha)

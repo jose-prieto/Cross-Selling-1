@@ -19,6 +19,7 @@ class tdv_load:
         self.pyme = rrgg_pyme_load(self.ruta, cartera)
         
         self.df = pd.concat([self.corporativo.df, self.empresa.df, self.institucional.df, self.pyme.df]).groupby(['mis']).sum().reset_index()
+        self.df = self.df[(self.df["monto"] > 0)]
         
         self.df = self.df.assign(fecha = self.fecha)
         

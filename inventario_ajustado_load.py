@@ -20,6 +20,7 @@ class inventario_ajustado_load:
         self.df['monto'] = self.df['monto'].astype(float)
         print("inventario Total: ", self.df['monto'].sum())
         self.df = pd.merge(self.df, cartera, how='inner', right_on='MisCliente', left_on='mis')
+        self.df = self.df[(self.df["monto"] > 0)]
         
         self.dfDolar = self.df[(self.df["PRODUCTO AJUSTADO"] == "CRÉDITOS EN CUOTAS MONEDA EXTRANJERA")]
         self.dfBs = self.df[(self.df["PRODUCTO AJUSTADO"] != "CRÉDITOS EN CUOTAS MONEDA EXTRANJERA")]

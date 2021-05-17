@@ -16,6 +16,7 @@ class custodia_load:
         self.df['montoEuro'] = self.df['montoEuro'].astype(float)
         
         self.df = self.df.groupby(['mis'], as_index=False).agg({'montoDolar': sum, 'montoEuro': sum})
+        self.df = self.df[(self.df["montoDolar"] > 0) | (self.df["montoEuro"] > 0)]
         
         print("Custodia dólar: ", self.df['montoDolar'].sum())
         print("Custodia euro: ", self.df['montoEuro'].sum())

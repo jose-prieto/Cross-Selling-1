@@ -14,6 +14,7 @@ class mesa_cambio_load:
         self.df['montoVenta'] = self.df['montoVenta'].astype(float)
         print("Mesa de cabio compra monto: ", self.df['montoCompra'].sum())
         print("Mesa de cabio venta monto: ", self.df['montoVenta'].sum())
+        self.df = self.df[(self.df["montoCompra"] > 0) | (self.df["montoVenta"] > 0)]
         self.df['rif'] = self.df['rif'].str.strip()
         self.df = self.recorrerDF(self.df)
         self.df = pd.merge(self.df, cartera, how='inner', right_on='CedulaCliente', left_on='rif')
@@ -23,10 +24,12 @@ class mesa_cambio_load:
         self.df = self.df.assign(fecha = fecha)
         
     def get_monto(self):
-        dfCompra = self.df.groupby(['mis'], as_index=False).agg({'montoCompra': sum})
+        dfCompra = self.df
+        dfCompra = dfCompra.groupby(['mis'], as_index=False).agg({'montoCompra': sum})
         dfCompra = dfCompra.rename(columns={'montoCompra': 'monto'})
         
-        dfVenta = self.df.groupby(['mis'], as_index=False).agg({'montoVenta': sum})
+        dfVenta = self.df
+        dfVenta = dfVenta.groupby(['mis'], as_index=False).agg({'montoVenta': sum})
         dfVenta = dfVenta.rename(columns={'montoVenta': 'monto'})
         
         dfCompra['monto'] = dfCompra['monto'].astype(str)

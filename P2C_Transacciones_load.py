@@ -21,6 +21,7 @@ class P2C_Transacciones_load:
         self.df = self.recorrerDF(self.df)
         self.df = pd.merge(self.df, cartera, how='inner', right_on='CedulaCliente', left_on='rif')
         self.df = self.df.groupby(['MisCliente'], as_index=False).agg({'monto': sum})
+        self.df = self.df[(self.df["monto"] > 0)]
             
         self.df = self.df.rename(columns={"MisCliente": "mis"})
         

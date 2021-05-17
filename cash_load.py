@@ -2,7 +2,7 @@ import pandas as pd
 import csv
 from cash.pap_load import pap_load
 from cash.nom_load import nom_load
-from cash.dedicheq_load import dedicheq_load
+#from cash.dedicheq_load import dedicheq_load
 from cash.pet_load import pet_load
 from cash.ppt_load import ppt_load
 from cash.dom_load import dom_load
@@ -22,7 +22,7 @@ class cash_load:
                                 edi_pap_load(ruta, cartera, fecha).df.dropna(axis=0, how='any')]).groupby(['mis']).sum().reset_index()
         self.dfnom = pd.concat([nom_load(ruta, cartera, fecha).df.dropna(axis=0, how='any'), 
                                 edi_nom_load(ruta, cartera, fecha).df.dropna(axis=0, how='any')]).groupby(['mis']).sum().reset_index()
-        self.dfdedicheq = dedicheq_load(ruta, cartera, fecha).df.dropna(axis=0, how='any')
+        #self.dfdedicheq = dedicheq_load(ruta, cartera, fecha).df.dropna(axis=0, how='any')
         self.dfpet = pet_load(ruta, cartera, fecha).df.dropna(axis=0, how='any')
         self.dfppt = ppt_load(ruta, cartera, fecha).df.dropna(axis=0, how='any')
         self.dfdom = pd.concat([dom_load(ruta, cartera, fecha).df.dropna(axis=0, how='any'), 
@@ -37,7 +37,7 @@ class cash_load:
         
         self.dfPap = self.dfPap.assign(fecha = fecha)
         self.dfnom = self.dfnom.assign(fecha = fecha)
-        self.dfdedicheq = self.dfdedicheq.assign(fecha = fecha)
+        #self.dfdedicheq = self.dfdedicheq.assign(fecha = fecha)
         self.dfpet = self.dfpet.assign(fecha = fecha)
         self.dfppt = self.dfppt.assign(fecha = fecha)
         self.dfdom = self.dfdom.assign(fecha = fecha)
@@ -47,41 +47,41 @@ class cash_load:
         self.dfedipap = self.dfedipap.assign(fecha = fecha)"""
         
     def get_monto(self):
-        dfPap = self.dfPap.groupby(['mis'], as_index=False).agg({'mis': 'first', 'monto': sum})
+        dfPap = self.dfPap
         dfPap['monto'] = dfPap['monto'].astype(str)
         for i in range(len(dfPap['monto'])):
             dfPap['monto'][i]=dfPap['monto'][i].replace('.',',')
             
-        dfnom = self.dfnom.groupby(['mis'], as_index=False).agg({'mis': 'first', 'monto': sum})
+        dfnom = self.dfnom
         dfnom['monto'] = dfnom['monto'].astype(str)
         for i in range(len(dfnom['monto'])):
             dfnom['monto'][i]=dfnom['monto'][i].replace('.',',')
             
-        dfdedicheq = self.dfdedicheq.groupby(['mis'], as_index=False).agg({'mis': 'first', 'monto': sum})
+        """dfdedicheq = self.dfdedicheq.groupby(['mis'], as_index=False).agg({'mis': 'first', 'monto': sum})
         dfdedicheq['monto'] = dfdedicheq['monto'].astype(str)
         for i in range(len(dfdedicheq['monto'])):
-            dfdedicheq['monto'][i]=dfdedicheq['monto'][i].replace('.',',')
+            dfdedicheq['monto'][i]=dfdedicheq['monto'][i].replace('.',',')"""
             
-        dfPet = self.dfpet.groupby(['mis'], as_index=False).agg({'mis': 'first', 'monto': sum})
+        dfPet = self.dfpet
         dfPet['monto'] = dfPet['monto'].astype(str)
         for i in range(len(dfPet['monto'])):
             dfPet['monto'][i]=dfPet['monto'][i].replace('.',',')
             
-        dfppt = self.dfppt.groupby(['mis'], as_index=False).agg({'mis': 'first', 'monto': sum})
+        dfppt = self.dfppt
         dfppt['monto'] = dfppt['monto'].astype(str)
         for i in range(len(dfppt['monto'])):
             dfppt['monto'][i]=dfppt['monto'][i].replace('.',',')
             
-        dfdom = self.dfdom.groupby(['mis'], as_index=False).agg({'mis': 'first', 'monto': sum})
+        dfdom = self.dfdom
         dfdom['monto'] = dfdom['monto'].astype(str)
         for i in range(len(dfdom['monto'])):
             dfdom['monto'][i]=dfdom['monto'][i].replace('.',',')
         
         dfMonto = pd.merge(dfPap.rename(columns={'monto': 'Pagos a Proveedores'}), dfnom.rename(columns={'monto': 'Nómina'}), how='outer', right_on='mis', left_on='mis')
-        dfMonto = pd.merge(dfMonto, dfdedicheq.rename(columns={'monto': 'Dedicheq'}), how='outer', right_on='mis', left_on='mis')
+        #dfMonto = pd.merge(dfMonto, dfdedicheq.rename(columns={'monto': 'Dedicheq'}), how='outer', right_on='mis', left_on='mis')
         dfMonto = pd.merge(dfMonto, dfPet.rename(columns={'monto': 'Pagos Especiales a Terceros'}), how='outer', right_on='mis', left_on='mis')
         dfMonto = pd.merge(dfMonto, dfppt.rename(columns={'monto': 'Pagos por Taquilla'}), how='outer', right_on='mis', left_on='mis')
-        return pd.merge(dfMonto, dfdom.rename(columns={'monto': 'Domiciliación'}), how='outer', right_on='mis', left_on='mis').groupby(['mis'], as_index=False).agg({'Pagos a Proveedores': 'first', 'Nómina': 'first', 'Dedicheq': 'first', 'Pagos Especiales a Terceros': 'first', 'Pagos por Taquilla': 'first', 'Domiciliación': 'first'})
+        return pd.merge(dfMonto, dfdom.rename(columns={'monto': 'Domiciliación'}), how='outer', right_on='mis', left_on='mis').groupby(['mis'], as_index=False).agg({'Pagos a Proveedores': 'first', 'Nómina': 'first', 'Pagos Especiales a Terceros': 'first', 'Pagos por Taquilla': 'first', 'Domiciliación': 'first'})
     
     def get_usable(self):
         dfPap = self.dfPap.assign(uso = 1)
@@ -90,8 +90,8 @@ class cash_load:
         dfnom = self.dfnom.assign(uso = 1)
         dfnom = dfnom.rename(columns={'uso': 'Nómina'}).groupby(['mis'], as_index=False).agg({'Nómina': 'first'})
         
-        dfdedicheq = self.dfdedicheq.assign(uso = 1)
-        dfdedicheq = dfdedicheq.rename(columns={'uso': 'Dedicheq'}).groupby(['mis'], as_index=False).agg({'Dedicheq': 'first'})
+        """dfdedicheq = self.dfdedicheq.assign(uso = 1)
+        dfdedicheq = dfdedicheq.rename(columns={'uso': 'Dedicheq'}).groupby(['mis'], as_index=False).agg({'Dedicheq': 'first'})"""
         
         dfpet = self.dfpet.assign(uso = 1)
         dfpet = dfpet.rename(columns={'uso': 'Pagos Especiales a Terceros'}).groupby(['mis'], as_index=False).agg({'Pagos Especiales a Terceros': 'first'})
@@ -106,11 +106,11 @@ class cash_load:
         dfEdi = dfEdi.rename(columns={'uso': 'EDI'}).groupby(['mis'], as_index=False).agg({'EDI': 'first'})
         
         dfMonto = pd.merge(dfPap, dfnom, how='outer', right_on='mis', left_on='mis')
-        dfMonto = pd.merge(dfMonto, dfdedicheq, how='outer', right_on='mis', left_on='mis')
+        #dfMonto = pd.merge(dfMonto, dfdedicheq, how='outer', right_on='mis', left_on='mis')
         dfMonto = pd.merge(dfMonto, dfpet, how='outer', right_on='mis', left_on='mis')
         dfMonto = pd.merge(dfMonto, dfppt, how='outer', right_on='mis', left_on='mis')
         dfMonto = pd.merge(dfMonto, dfdom, how='outer', right_on='mis', left_on='mis')
-        return pd.merge(dfMonto, dfEdi, how='outer', right_on='mis', left_on='mis').groupby(['mis'], as_index=False).agg({'Pagos a Proveedores': 'first', 'Nómina': 'first', 'Dedicheq': 'first', 'Pagos Especiales a Terceros': 'first', 'Pagos por Taquilla': 'first', 'Domiciliación': 'first', 'EDI': 'first'})
+        return pd.merge(dfMonto, dfEdi, how='outer', right_on='mis', left_on='mis').groupby(['mis'], as_index=False).agg({'Pagos a Proveedores': 'first', 'Nómina': 'first', 'Pagos Especiales a Terceros': 'first', 'Pagos por Taquilla': 'first', 'Domiciliación': 'first', 'EDI': 'first'})
         
     def crear_excel(self, ruta):
         writer = pd.ExcelWriter(ruta + '\cash_llena.xlsx')
@@ -120,7 +120,7 @@ class cash_load:
         df.to_excel(writer, sheet_name="NOM", index=False)
         df.to_excel(writer, sheet_name="DOM", index=False)
         df.to_excel(writer, sheet_name="PPT", index=False)
-        df.to_excel(writer, sheet_name="Dedicheq", index=False)
+        #df.to_excel(writer, sheet_name="Dedicheq", index=False)
         df.to_excel(writer, sheet_name="EDIPAP", index=False)
         df.to_excel(writer, sheet_name="EDIDOM", index=False)
         df.to_excel(writer, sheet_name="EDINOM", index=False)
@@ -137,10 +137,10 @@ class cash_load:
             self.dfnom.df['monto'][i]=self.dfnom.df['monto'][i].replace('.',',')
         self.dfnom.df.to_csv(self.ruta + '\\rchivos csv\\nom.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
         
-        self.dfdedicheq.df['monto'] = self.dfdedicheq.df['monto'].astype(str)
+        """self.dfdedicheq.df['monto'] = self.dfdedicheq.df['monto'].astype(str)
         for i in range(len(self.dfdedicheq.df['monto'])):
             self.dfdedicheq.df['monto'][i]=self.dfdedicheq.df['monto'][i].replace('.',',')
-        self.dfdedicheq.df.to_csv(self.ruta + '\\rchivos csv\\dedicheq.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        self.dfdedicheq.df.to_csv(self.ruta + '\\rchivos csv\\dedicheq.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)"""
         
         self.dfpet.df['monto'] = self.dfpet.df['monto'].astype(str)
         for i in range(len(self.dfpet.df['monto'])):

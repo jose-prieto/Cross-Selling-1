@@ -24,13 +24,16 @@ class ah_unifica_load:
                           (self.df[" Categoria "] != "V") &
                           (self.df[" Estatus de la Operacion "] != "C")]
         print("ah_unifica monto total: ", self.df[' Monto Contable '].sum())
+        
         self.df = pd.merge(self.df, cartera, how='inner', right_on='MisCliente', left_on=' MIS ')
         self.dfBs = self.df[(self.df[" Producto "] != "Ahorro - CUENTA EN DOLARES")]
         self.dfBs = self.dfBs.groupby([' MIS '], as_index=False).agg({' Monto Contable ': sum})
         self.dfBs = self.dfBs.rename(columns={' MIS ': 'mis', ' Monto Contable ': 'monto'})
         print("ah_unifica Bolívares monto total: ", self.dfBs['monto'].sum())
+        
         self.dfDolar = self.df[(self.df[" Producto "] == "Ahorro - CUENTA EN DOLARES")]
         self.dfDolar = self.dfDolar.groupby([' MIS '], as_index=False).agg({' Monto Contable ': sum})
+        self.dfDolar = self.dfDolar[(self.dfDolar[" Monto Contable "] > 0)]
         self.dfDolar = self.dfDolar.rename(columns={' MIS ': 'mis', ' Monto Contable ': 'monto'})
         print("ah_unifica dólares monto total: ", self.dfDolar['monto'].sum())
     

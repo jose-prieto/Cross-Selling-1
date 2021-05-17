@@ -34,15 +34,15 @@ class unifica_load:
     def get_monto(self):
         dfEuro = self.dfEuro
         dfEuro = dfEuro.groupby(['mis'], as_index=False).agg({'monto': sum})
-        dfEuro['monto'] = self.dfEuro['monto'].astype(str)
+        dfEuro['monto'] = dfEuro['monto'].astype(str)
         
         dfDolar = self.dfDolar
         dfDolar = dfDolar.groupby(['mis'], as_index=False).agg({'monto': sum})
-        dfDolar['monto'] = self.dfDolar['monto'].astype(str)
+        dfDolar['monto'] = dfDolar['monto'].astype(str)
         
         dfBs = self.dfBs
         dfBs = dfBs.groupby(['mis'], as_index=False).agg({'monto': sum})
-        dfBs['monto'] = self.dfBs['monto'].astype(str)
+        dfBs['monto'] = dfBs['monto'].astype(str)
         
         for i in range(len(dfBs['monto'])):
             dfBs['monto'][i]=dfBs['monto'][i].replace('.',',')
@@ -64,19 +64,11 @@ class unifica_load:
         dfBs = dfBs.rename(columns={'uso': 'Corriente/Ahorro'})
         dfBs = dfBs.groupby(['mis'], as_index=False).agg({'Corriente/Ahorro': 'first'})
         
-        dfDolar = self.dfDolar.assign(uso = 1)
-        dfDolar = dfDolar.rename(columns={'uso': 'Convenio 20 / Convenio 1'})
-        dfDolar = dfDolar.groupby(['mis'], as_index=False).agg({'Convenio 20 / Convenio 1': 'first'})
+        df = pd.merge(self.dfDolar, self.dfEuro, how='outer', right_on='mis', left_on='mis')
+        df = df.assign(uso = 1)
+        df = df.groupby(['mis'], as_index=False).agg({'uso': 'first'})
         
-        dfEuro = self.dfEuro.assign(uso = 1)
-        dfEuro = dfEuro.rename(columns={'uso': 'Cuenta en Euros'})
-        dfEuro = dfEuro.groupby(['mis'], as_index=False).agg({'Cuenta en Euros': 'first'})
-        
-        df = pd.merge(dfBs.rename(columns={'uso': 'Corriente/Ahorro'}), 
-                           dfDolar.rename(columns={'uso': 'Convenio 20 / Convenio 1'}), 
-                           how='outer', right_on='mis', left_on='mis')
-        
-        return pd.merge(df, dfEuro.rename(columns={'uso': 'Cuenta en Euros'}), 
+        return pd.merge(dfBs, df.rename(columns={'uso': 'Cuenta Moneda Extranjera (Dólar y Euro)'}), 
                         how='outer', right_on='mis', left_on='mis')
     
     def insertDf(self):

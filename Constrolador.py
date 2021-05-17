@@ -67,22 +67,22 @@ class controlador:
         clientes = pd.merge(self.cargaDatos.cartera.df, self.crear_cartera_clientes(), how='inner', left_on='MisCliente', right_on='mis').fillna(0)
         montos = pd.merge(self.cargaDatos.cartera.df, self.crear_cartera_montos(), how='inner', left_on='MisCliente', right_on='mis').fillna(0)
         
-        writer = pd.ExcelWriter(self.ruta + '\Cross-Selling-Abril-2021-Corporativa.xlsx')
+        writer = pd.ExcelWriter(self.ruta + '\Cross-Selling-Enero-2021-Corporativa.xlsx')
         clientes[(clientes["Segmento Mis"] == "CP-CORPORATIVO")].to_excel(writer, sheet_name="CS Clientes", index=False, startrow=8, freeze_panes=(9,5))
         montos[(montos["Segmento Mis"] == "CP-CORPORATIVO")].to_excel(writer, sheet_name="Montos por Producto Cliente", index=False, startrow=8, freeze_panes=(9,5))
         writer.save()
         
-        writer = pd.ExcelWriter(self.ruta + '\Cross-Selling-Abril-2021-Institucional.xlsx')
+        writer = pd.ExcelWriter(self.ruta + '\Cross-Selling-Enero-2021-Institucional.xlsx')
         clientes[(clientes["Segmento Mis"] == "CI-INSTITUCIONAL")].to_excel(writer, sheet_name="CS Clientes", index=False, startrow=8, freeze_panes=(9,5))
         montos[(montos["Segmento Mis"] == "CI-INSTITUCIONAL")].to_excel(writer, sheet_name="Montos por Producto Cliente", index=False, startrow=8, freeze_panes=(9,5))
         writer.save()
         
-        writer = pd.ExcelWriter(self.ruta + '\Cross-Selling-Abril-2021-Empresa.xlsx')
+        writer = pd.ExcelWriter(self.ruta + '\Cross-Selling-Enero-2021-Empresa.xlsx')
         clientes[(clientes["Segmento Mis"] == "CS-EMPRESA")].to_excel(writer, sheet_name="CS Clientes", index=False, startrow=8, freeze_panes=(9,5))
         montos[(montos["Segmento Mis"] == "CS-EMPRESA")].to_excel(writer, sheet_name="Montos por Producto Cliente", index=False, startrow=8, freeze_panes=(9,5))
         writer.save()
         
-        writer = pd.ExcelWriter(self.ruta + '\Cross-Selling-Abril-2021-Pyme.xlsx')
+        writer = pd.ExcelWriter(self.ruta + '\Cross-Selling-Enero-2021-Pyme.xlsx')
         clientes[(clientes["Segmento Mis"] == "CR-PYME")].to_excel(writer, sheet_name="CS Clientes", index=False, startrow=8, freeze_panes=(9,5))
         montos[(montos["Segmento Mis"] == "CR-PYME")].to_excel(writer, sheet_name="Montos por Producto Cliente", index=False, startrow=8, freeze_panes=(9,5))
         writer.save()
@@ -97,7 +97,7 @@ class controlador:
         self.custodia.insertDf()
         
     #Dirección en pc de archivos fuente, dirección de base de datos destino, nombre de la tabla dentro de la cartera clientes y fecha a asignar a cada registro.
-contro = controlador(r'C:\Users\José Prieto\Documents\Bancaribe\Abril', r'C:\Users\José Prieto\Documents\Bancaribe\Cross Selling', "Cartera_Clientes_Abril_2021", '30/04/2021')
+contro = controlador(r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Insumos Cross Selling\Enero', r'C:\Users\José Prieto\Documents\Bancaribe\Cross Selling', "Cartera_Clientes_Enero_2020", '29/01/2021')
 df = contro.cargaDatos.cartera.df
 contro.crear_excel()
 

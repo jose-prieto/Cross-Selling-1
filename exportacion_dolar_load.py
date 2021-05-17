@@ -13,6 +13,7 @@ class exportacion_dolar_load:
         self.df['montoCompra'] = self.df['montoCompra'].astype(float)
         self.df['montoVenta'] = self.df['montoVenta'].astype(float)
         self.df['rif'] = self.df['rif'].str.strip()
+        self.df = self.df[(self.df["montoCompra"] > 0) | (self.df["montoVenta"] > 0)]
         
         print("Exportación dólar compra: ", self.df['montoCompra'].sum())
         print("Exportación dólar venta: ", self.df['montoVenta'].sum(), "\n")

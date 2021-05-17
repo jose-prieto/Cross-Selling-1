@@ -13,8 +13,7 @@ class ivr_conexion_load:
             self.ruta = file
         self.df = pd.read_csv(self.ruta, delimiter='|', dtype=str, encoding='latin-1', quoting=csv.QUOTE_NONE)
         self.df = self.df[self.df["cedula"].str.startswith(("J", "R", "G", "F"))]
-        print("conexiones totales: ", len(self.df.index))
-        print("\n")
+        print("conexiones totales: ", len(self.df.index), "\n")
         
         self.df = self.df.rename(columns={'cedula': 'rif'})
         self.df['rif'] = self.df['rif'].str.strip()

@@ -19,6 +19,7 @@ class intervencion_tdc_load:
         self.df = pd.merge(self.df, cartera, how='inner', right_on='CedulaCliente', left_on='rif')
         self.df = self.df.rename(columns={'MisCliente': 'mis', 'montoVenta': 'monto'})
         self.df = self.df.groupby(['mis'], as_index=False).agg({'monto': sum})
+        self.df = self.df[(self.df["monto"] > 0)]
             
         self.df = self.df.assign(fecha = fecha)
         
