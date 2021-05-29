@@ -13,7 +13,6 @@ class cc_unifica_load:
         for file in gb.glob(ruta + self.nombre_archivo + '*.txt'):
             self.ruta = file
         self.df = pd.read_csv(self.ruta, delimiter='|', index_col=False, decimal=",", dtype=str, encoding='latin-1', quoting=csv.QUOTE_NONE)
-        self.df = self.df[(self.df[" Tipo Persona "] == "PERSONA JURIDICA")]
         self.df[' Monto Contable '] = self.df[' Monto Contable '].astype('float')
         #print(self.df[self.df[' Oficina Contable '].isnull()])
         self.df[' Oficina Contable '] = self.df[' Oficina Contable '].astype('int')

@@ -9,12 +9,14 @@ class cartera_cliente_load:
     def __init__(self, ruta, rutadb, db, fecha):
         print("Creando cartera")
         self.rutadb = rutadb
-        self.nombre_archivo = '\Cartera_Cliente'
+        #self.nombre_archivo = '\Cartera_Cliente'
+        self.nombre_archivo = '\Cartera_'
         self.rutaOrigin = ruta
         for file in gb.glob(ruta + self.nombre_archivo + '*.accdb'):
             self.ruta = file
         self.conn = pdbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=' + self.ruta)
-        self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "Segmento Mis", "Unidad De Negocio", "Region", "Nombre del Responsable" FROM ' + db + ' WHERE "Tipo de Persona" = ?', self.conn, params=["PJ"])
+        #self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "MIS Grupo", "Grupo Economico", "Cod Of", "Segmento", "Unidad De Negocio", "Región", "Nombre completo" FROM ' + db + ' WHERE "Título" = ?', self.conn, params=["Asesor de Negocios Comerciales"])
+        self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "Segmento Mis", "Unidad De Negocio", "Region", "Nombre del Responsable" FROM ' + db + ' WHERE "TipoResp" = ?', self.conn, params=["Asesor de Negocios Comerciales"])
         self.df['CedulaCliente'] = self.df['CedulaCliente'].str.strip()
         self.df = self.recorrerDF(self.df)
         self.df['MisCliente'] = self.df['MisCliente'].astype(str)
@@ -22,6 +24,8 @@ class cartera_cliente_load:
         self.df = self.df.assign(fecha = fecha)
 
     def quitarCeros(self, rifCliente):
+        if not rifCliente:
+            return rifCliente
         aux = rifCliente[1:]
         while (len(aux) < 9):
             aux = '0' + aux

@@ -1,4 +1,5 @@
 from rrgg.rrgg_institucional_load import rrgg_institucional_load
+from ahorro_corriente.pf_unifica_load import pf_unifica_load
 from rrgg.rrgg_corporativo_load import rrgg_corporativo_load
 from rrgg.rrgg_empresa_load import rrgg_empresa_load
 from rrgg.rrgg_pyme_load import rrgg_pyme_load
@@ -17,8 +18,10 @@ class tdv_load:
         self.empresa = rrgg_empresa_load(self.ruta, cartera)
         self.institucional = rrgg_institucional_load(self.ruta, cartera)
         self.pyme = rrgg_pyme_load(self.ruta, cartera)
+        self.pf_unifica = pf_unifica_load(self.ruta, cartera)
         
-        self.df = pd.concat([self.corporativo.df, self.empresa.df, self.institucional.df, self.pyme.df]).groupby(['mis']).sum().reset_index()
+        self.df = pd.concat([self.corporativo.df, self.empresa.df, self.institucional.df, 
+                             self.pyme.df, self.pf_unifica.df]).groupby(['mis']).sum().reset_index()
         self.df = self.df[(self.df["monto"] > 0)]
         
         self.df = self.df.assign(fecha = self.fecha)

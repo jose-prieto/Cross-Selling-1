@@ -12,7 +12,6 @@ class ivr_conexion_load:
         for file in gb.glob(ruta + self.nombre_archivo + '*.txt'):
             self.ruta = file
         self.df = pd.read_csv(self.ruta, delimiter='|', dtype=str, encoding='latin-1', quoting=csv.QUOTE_NONE)
-        self.df = self.df[self.df["cedula"].str.startswith(("J", "R", "G", "F"))]
         print("conexiones totales: ", len(self.df.index), "\n")
         
         self.df = self.df.rename(columns={'cedula': 'rif'})

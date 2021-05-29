@@ -15,7 +15,6 @@ class inventario_ajustado_load:
             self.ruta = file
         self.df = pd.read_excel(self.ruta, usecols = 'A:AJ', header=0, index_col=False, keep_default_na=True, sheet_name="INVENTARIO_DEL_DÍA", dtype=str)
         self.df['CI O RIF'] = self.df['CI O RIF'].str.strip()
-        self.df = self.df[(self.df["CI O RIF"].str.startswith(("J", "R", "G", "F")))]
         self.df = self.df.rename(columns={'MIS': 'mis', 'VIGENTE': 'monto'})
         self.df['monto'] = self.df['monto'].astype(float)
         print("inventario Total: ", self.df['monto'].sum())
@@ -29,7 +28,7 @@ class inventario_ajustado_load:
         
     def get_monto(self):
         dfDolar = self.dfDolar.groupby(['mis'], as_index=False).agg({'monto': sum})
-        dfDolar['monto'] = dfDolar['monto'].div(2815815)
+        dfDolar['monto'] = dfDolar['monto'].div(186950)
         print("inventario Dolar: ", dfDolar['monto'].sum())
         dfDolar['monto'] = dfDolar['monto'].astype(str)
         for i in range(len(dfDolar['monto'])):

@@ -17,7 +17,8 @@ class unifica_load:
         self.dfBs = pd.concat([self.cc_unifica.dfBs, self.ah_unifica.dfBs]).groupby(['mis']).sum().reset_index()
         self.dfBs = self.dfBs.assign(fecha = self.fecha)
         
-        self.dfDolar = pd.concat([self.cc_unifica.dfDolar, self.ah_unifica.dfDolar]).groupby(['mis']).sum().reset_index()
+        self.dfDolar = pd.concat([self.cc_unifica.dfDolar, 
+                                  self.ah_unifica.dfDolar]).groupby(['mis']).sum().reset_index()
         self.dfDolar = self.dfDolar.assign(fecha = self.fecha)
         
         self.dfEuro = self.cc_unifica.dfEuro

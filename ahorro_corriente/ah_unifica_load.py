@@ -15,7 +15,6 @@ class ah_unifica_load:
         self.df = self.df.dropna(subset=[' Oficina Contable '])
         self.df[' Oficina Contable '] = self.df[' Oficina Contable '].astype(int)
         self.df = self.df[(self.df[" Oficina Contable "] <= 699) & 
-                          (self.df[" Tipo Persona "] == "PERSONA JURIDICA") & 
                           (self.df[" Categoria "] != "B") & 
                           (self.df[" Categoria "] != "F") & 
                           (self.df[" Categoria "] != "H") & 

@@ -9,19 +9,32 @@ class mesa_cambio_load:
         self.ruta = ruta
         input("Vacíe la información necesaria en el archivo de excel llamado 'mesa_cambio_llenar.xlsx' recién creado en la ruta:\n\n" + ruta + "\n\nluego presione Enter")
         print("Creando mesa de cambio\n")
-        self.df = pd.read_excel(self.ruta + '\mesa_cambio_llenar.xlsx', usecols = 'A:C', header=0, index_col=False, keep_default_na=True, dtype=str)
+        self.df = pd.read_excel(self.ruta + '\mesa_cambio_llenar.xlsx', usecols = 'A:C', sheet_name = "DOLAR", header=0, index_col=False, keep_default_na=True, dtype=str)
         self.df['montoCompra'] = self.df['montoCompra'].astype(float)
         self.df['montoVenta'] = self.df['montoVenta'].astype(float)
-        print("Mesa de cabio compra monto: ", self.df['montoCompra'].sum())
-        print("Mesa de cabio venta monto: ", self.df['montoVenta'].sum())
+        print("Mesa de cabio DOLAR compra monto: ", self.df['montoCompra'].sum())
+        print("Mesa de cabio DOLAR venta monto: ", self.df['montoVenta'].sum())
         self.df = self.df[(self.df["montoCompra"] > 0) | (self.df["montoVenta"] > 0)]
         self.df['rif'] = self.df['rif'].str.strip()
         self.df = self.recorrerDF(self.df)
         self.df = pd.merge(self.df, cartera, how='inner', right_on='CedulaCliente', left_on='rif')
         self.df = self.df.rename(columns={'MisCliente': 'mis'})
         self.df = self.df.groupby(['mis'], as_index=False).agg({'montoCompra': sum, 'montoVenta':sum})
+        
+        self.dfEuro = pd.read_excel(self.ruta + '\mesa_cambio_llenar.xlsx', usecols = 'A:C', sheet_name = "EURO", header=0, index_col=False, keep_default_na=True, dtype=str)
+        self.dfEuro['montoCompra'] = self.dfEuro['montoCompra'].astype(float)
+        self.dfEuro['montoVenta'] = self.dfEuro['montoVenta'].astype(float)
+        print("Mesa de cabio EURO compra monto: ", self.dfEuro['montoCompra'].sum())
+        print("Mesa de cabio EURO venta monto: ", self.dfEuro['montoVenta'].sum())
+        self.dfEuro = self.dfEuro[(self.dfEuro["montoCompra"] > 0) | (self.dfEuro["montoVenta"] > 0)]
+        self.dfEuro['rif'] = self.dfEuro['rif'].str.strip()
+        self.dfEuro = self.recorrerDF(self.dfEuro)
+        self.dfEuro = pd.merge(self.dfEuro, cartera, how='inner', right_on='CedulaCliente', left_on='rif')
+        self.dfEuro = self.dfEuro.rename(columns={'MisCliente': 'mis'})
+        self.dfEuro = self.dfEuro.groupby(['mis'], as_index=False).agg({'montoCompra': sum, 'montoVenta':sum})
             
         self.df = self.df.assign(fecha = fecha)
+        self.dfEuro = self.dfEuro.assign(fecha = fecha)
         
     def get_monto(self):
         dfCompra = self.df
@@ -32,6 +45,14 @@ class mesa_cambio_load:
         dfVenta = dfVenta.groupby(['mis'], as_index=False).agg({'montoVenta': sum})
         dfVenta = dfVenta.rename(columns={'montoVenta': 'monto'})
         
+        dfEuroCompra = self.dfEuro
+        dfEuroCompra = dfEuroCompra.groupby(['mis'], as_index=False).agg({'montoCompra': sum})
+        dfEuroCompra = dfEuroCompra.rename(columns={'montoCompra': 'monto'})
+        
+        dfEuroVenta = self.dfEuro
+        dfEuroVenta = dfEuroVenta.groupby(['mis'], as_index=False).agg({'montoVenta': sum})
+        dfEuroVenta = dfEuroVenta.rename(columns={'montoVenta': 'monto'})
+        
         dfCompra['monto'] = dfCompra['monto'].astype(str)
         for i in range(len(dfCompra['monto'])):
             dfCompra['monto'][i]=dfCompra['monto'][i].replace('.',',')
@@ -40,7 +61,23 @@ class mesa_cambio_load:
         for i in range(len(dfVenta['monto'])):
             dfVenta['monto'][i]=dfVenta['monto'][i].replace('.',',')
             
-        return pd.merge(dfCompra.rename(columns={'monto': 'Mesa de Cambio Compra (USD)'}), dfVenta.rename(columns={'monto': 'Mesa de Cambio Venta (USD)'}), how='outer', right_on='mis', left_on='mis')
+        dfEuroCompra['monto'] = dfEuroCompra['monto'].astype(str)
+        for i in range(len(dfEuroCompra['monto'])):
+            dfEuroCompra['monto'][i]=dfEuroCompra['monto'][i].replace('.',',')
+            
+        dfEuroVenta['monto'] = dfEuroVenta['monto'].astype(str)
+        for i in range(len(dfEuroVenta['monto'])):
+            dfEuroVenta['monto'][i]=dfEuroVenta['monto'][i].replace('.',',')
+            
+        df = pd.merge(dfCompra.rename(columns={'monto': 'Mesa de Cambio Compra (USD)'}), 
+                      dfVenta.rename(columns={'monto': 'Mesa de Cambio Venta (USD)'}), 
+                      how='outer', right_on='mis', left_on='mis')
+        
+        df = pd.merge(df, dfEuroCompra.rename(columns={'monto': 'Mesa de Cambio Compra (EURO)'}), 
+                      how='outer', right_on='mis', left_on='mis')
+            
+        return pd.merge(df, dfEuroVenta.rename(columns={'monto': 'Mesa de Cambio Venta (EURO)'}), 
+                      how='outer', right_on='mis', left_on='mis')
         
     
     def get_usable(self):
@@ -63,7 +100,8 @@ class mesa_cambio_load:
     def crear_excel(self, ruta):
         writer = pd.ExcelWriter(ruta + '\mesa_cambio_llenar.xlsx')
         df = pd.DataFrame(columns = ['rif', 'montoCompra', 'montoVenta'])
-        df.to_excel(writer, index=False)
+        df.to_excel(writer, sheet_name="DOLAR", index=False)
+        df.to_excel(writer, sheet_name="EURO", index=False)
         writer.save()
     
     def to_csv(self):
