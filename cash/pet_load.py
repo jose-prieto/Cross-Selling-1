@@ -13,4 +13,7 @@ class pet_load:
         print("PET total: ", self.df['monto'].sum())
         
         self.df = pd.merge(self.df, cartera, how='inner', right_on='MisCliente', left_on='mis')
+        
+        self.df = self.df.groupby(['mis'], as_index=False).agg({'monto': sum})
+        
         self.df = self.df.assign(fecha = fecha)

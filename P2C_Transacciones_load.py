@@ -1,3 +1,4 @@
+from psycopg2.errors import ForeignKeyViolation
 import pandas as pd
 import glob as gb
 import csv
@@ -16,7 +17,7 @@ class P2C_Transacciones_load:
         self.df = self.df.rename(columns={'RIF': 'rif', 'Monto de la operacion': 'monto'})
         self.df['rif'] = self.df['rif'].str.strip()
         
-        print("P2C monto total: ", self.df['monto'].sum())
+        print("P2C monto total: ", self.df['monto'].sum(), "\n")
         
         self.df = self.recorrerDF(self.df)
         self.df = pd.merge(self.df, cartera, how='inner', right_on='CedulaCliente', left_on='rif')
@@ -55,6 +56,24 @@ class P2C_Transacciones_load:
         return df
     
     def to_csv(self):
-        self.df.to_csv(self.rutaOrigin + '\\rchivos csv\p2c.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        self.df.to_csv(self.rutaOrigin + '\\rchivos csv\p2c.csv', index = False, header=True, sep='|', encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
+    
+    def insertPg(self, conector):
+        print("Insertando p2c")
+        for indice_fila, fila in self.df.iterrows():
+            try:
+                conector.cursor.execute("INSERT INTO P2C (p2c_mis, p2c_monto, p2c_fecha) VALUES(%s, %s, %s)", 
+                               (fila["mis"], 
+                               fila["monto"], 
+                               fila["fecha"]))
+            except ForeignKeyViolation:
+                pass
+            except Exception as excep:
+                print(type(excep))
+                print(excep.args)
+                print(excep)
+                print("p2c")
+            finally:
+                conector.conn.commit()
     
 #p2c = P2C_Transacciones_load(r'C:\Users\José Prieto\Documents\Bancaribe\Enero').to_csv()

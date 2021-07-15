@@ -1,3 +1,4 @@
+from psycopg2.errors import ForeignKeyViolation
 import pandas as pd
 import csv
 
@@ -84,7 +85,13 @@ class mesa_cambio_load:
         df = self.df.assign(uso = 1)
         df = df.rename(columns={'uso': 'Mesa de Cambio (USD)'})
         
-        return df.groupby(['mis'], as_index=False).agg({'Mesa de Cambio (USD)': 'first'})
+        dfEuro = self.dfEuro.assign(uso = 1)
+        dfEuro = dfEuro.rename(columns={'uso': 'Mesa de Cambio (Euro)'})
+        
+        df = pd.merge(df, dfEuro, how='outer', right_on='mis', left_on='mis')
+        
+        return df.groupby(['mis'], as_index=False).agg({'Mesa de Cambio (USD)': 'first', 
+                                                        'Mesa de Cambio (Euro)': 'first'})
 
     def quitarCeros(self, rifCliente):
         aux = rifCliente[1:]
@@ -105,5 +112,42 @@ class mesa_cambio_load:
         writer.save()
     
     def to_csv(self):
-        self.dfCompra.to_csv(self.ruta + '\\rchivos csv\custodiaDolar.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
-        self.dfVenta.to_csv(self.ruta + '\\rchivos csv\custodiaEuro.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        self.df.to_csv(self.ruta + '\\rchivos csv\mesa_cambioDolar.csv', index = False, header=True, sep='|', encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
+        self.dfEuro.to_csv(self.ruta + '\\rchivos csv\mesa_cambioEuro.csv', index = False, header=True, sep='|', encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
+    
+    def insertPg(self, conector):
+        print("Insertando mesa de cambio en dólares")
+        for indice_fila, fila in self.df.iterrows():
+            try:
+                conector.cursor.execute("INSERT INTO MESA_CAMBIO_DOLAR (camd_mis, camd_monto_compra, camd_monto_venta, camd_fecha) VALUES(%s, %s, %s, %s)", 
+                               (fila["mis"], 
+                               fila["montoCompra"], 
+                               fila["montoVenta"], 
+                               fila["fecha"]))
+            except ForeignKeyViolation:
+                pass
+            except Exception as excep:
+                print(type(excep))
+                print(excep.args)
+                print(excep)
+                print("mesa de cambio")
+            finally:
+                conector.conn.commit()
+                
+        print("Insertando mesa de cambio en Bolívares")
+        for indice_fila, fila in self.dfEuro.iterrows():
+            try:
+                conector.cursor.execute("INSERT INTO MESA_CAMBIO_EURO (came_mis, came_monto_compra, came_monto_venta, came_fecha) VALUES(%s, %s, %s, %s)", 
+                               (fila["mis"], 
+                               fila["montoCompra"], 
+                               fila["montoVenta"], 
+                               fila["fecha"]))
+            except ForeignKeyViolation:
+                pass
+            except Exception as excep:
+                print(type(excep))
+                print(excep.args)
+                print(excep)
+                print("mesa de cambio")
+            finally:
+                conector.conn.commit()

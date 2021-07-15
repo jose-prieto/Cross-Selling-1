@@ -1,3 +1,4 @@
+from psycopg2.errors import ForeignKeyViolation
 import pandas as pd
 import csv
 
@@ -67,5 +68,23 @@ class exportacion_dolar_load:
         writer.save()
     
     def to_csv(self):
-        self.dfCompra.to_csv(self.ruta + '\\rchivos csv\custodiaDolar.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
-        self.dfVenta.to_csv(self.ruta + '\\rchivos csv\custodiaEuro.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        self.df.to_csv(self.ruta + '\\rchivos csv\exportacion.csv', index = False, header=True, sep='|', encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
+    
+    def insertPg(self, conector):
+        print("Insertando exportación")
+        for indice_fila, fila in self.df.iterrows():
+            try:    
+                conector.cursor.execute("INSERT INTO EXPORTACION (exp_mis, exp_monto_compra, exp_monto_venta, exp_fecha) VALUES(%s, %s, %s, %s)", 
+                               (fila["mis"], 
+                               fila["montoCompra"], 
+                               fila["montoVenta"], 
+                               fila["fecha"]))
+            except ForeignKeyViolation:
+                pass
+            except Exception as excep:
+                print(type(excep))
+                print(excep.args)
+                print(excep)
+                print("Exportacion dolar")
+            finally:
+                conector.conn.commit()

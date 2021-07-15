@@ -1,3 +1,4 @@
+from psycopg2.errors import ForeignKeyViolation
 import pandas as pd
 import glob as gb
 import csv
@@ -14,8 +15,7 @@ class inventario_ajustado_load:
         for file in gb.glob(self.ruta + self.nombre_archivo + '*.xlsx'):
             self.ruta = file
         self.df = pd.read_excel(self.ruta, usecols = 'A:AJ', header=0, index_col=False, keep_default_na=True, sheet_name="INVENTARIO_DEL_DÍA", dtype=str)
-        self.df['CI O RIF'] = self.df['CI O RIF'].str.strip()
-        self.df = self.df.rename(columns={'MIS': 'mis', 'VIGENTE': 'monto'})
+        self.df = self.df.rename(columns={"TOTAL CREDITO": 'monto', 'MIS': 'mis'})
         self.df['monto'] = self.df['monto'].astype(float)
         print("inventario Total: ", self.df['monto'].sum())
         self.df = pd.merge(self.df, cartera, how='inner', right_on='MisCliente', left_on='mis')
@@ -24,18 +24,20 @@ class inventario_ajustado_load:
         self.dfDolar = self.df[(self.df["PRODUCTO AJUSTADO"] == "CRÉDITOS EN CUOTAS MONEDA EXTRANJERA")]
         self.dfBs = self.df[(self.df["PRODUCTO AJUSTADO"] != "CRÉDITOS EN CUOTAS MONEDA EXTRANJERA")]
         
-        self.df = self.df.assign(fecha = fecha)
+        self.dfDolar = self.dfDolar.groupby(['mis'], as_index=False).agg({'monto': sum})
+        self.dfDolar['monto'] = self.dfDolar['monto'].div(float(input("\nEscribir tipo de cambio para inventario ajustado:\n")))
+        self.dfBs = self.dfBs.groupby(['mis'], as_index=False).agg({'monto': sum})
+        
+        self.dfDolar = self.dfDolar.assign(fecha = fecha)
+        self.dfBs = self.dfBs.assign(fecha = fecha)
         
     def get_monto(self):
         dfDolar = self.dfDolar.groupby(['mis'], as_index=False).agg({'monto': sum})
-        dfDolar['monto'] = dfDolar['monto'].div(186950)
-        print("inventario Dolar: ", dfDolar['monto'].sum())
         dfDolar['monto'] = dfDolar['monto'].astype(str)
         for i in range(len(dfDolar['monto'])):
             dfDolar['monto'][i]=dfDolar['monto'][i].replace('.',',')
             
         dfBs = self.dfBs.groupby(['mis'], as_index=False).agg({'monto': sum})
-        print("inventario Bs: ", dfBs['monto'].sum(), "\n")
         dfBs['monto'] = dfBs['monto'].astype(str)
         for i in range(len(dfBs['monto'])):
             dfBs['monto'][i]=dfBs['monto'][i].replace('.',',')
@@ -56,8 +58,43 @@ class inventario_ajustado_load:
         return pd.merge(dfBs, dfDolar, how='outer', right_on='mis', left_on='mis')
     
     def to_csv(self):
-        self.dfDolar.to_csv(self.rutaOrigin + '\\rchivos csv\credito_dolar.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
-        self.dfBs.to_csv(self.rutaOrigin + '\\rchivos csv\credito_vigente.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        self.dfDolar.to_csv(self.rutaOrigin + '\\rchivos csv\credito_dolar.csv', index = False, header=True, sep='|', encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
+        self.dfBs.to_csv(self.rutaOrigin + '\\rchivos csv\credito_vigente.csv', index = False, header=True, sep='|', encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
+    
+    def insertPg(self, conector):
+        print("Insertando inventario ajustado en Bolívares")
+        for indice_fila, fila in self.dfBs.iterrows():
+            try:
+                conector.cursor.execute("INSERT INTO CREDITO_VIGENTE (vig_mis, vig_monto, vig_fecha) VALUES(%s, %s, %s)", 
+                               (fila["mis"], 
+                               fila["monto"], 
+                               fila["fecha"]))
+            except ForeignKeyViolation:
+                pass
+            except Exception as excep:
+                print(type(excep))
+                print(excep.args)
+                print(excep)
+                print("inventario ajustado")
+            finally:
+                conector.conn.commit()
+                
+        print("Insertando inventario ajustado en Dólares")
+        for indice_fila, fila in self.dfDolar.iterrows():
+            try:
+                conector.cursor.execute("INSERT INTO CREDITO_DOLAR (cre_mis, cre_monto, cre_fecha) VALUES(%s, %s, %s)", 
+                               (fila["mis"], 
+                               fila["monto"], 
+                               fila["fecha"]))
+            except ForeignKeyViolation:
+                pass
+            except Exception as excep:
+                print(type(excep))
+                print(excep.args)
+                print(excep)
+                print("inventario ajustado")
+            finally:
+                conector.conn.commit()
     
 #todo = ah_unifica_load(r'C:\Users\José Prieto\Documents\Bancaribe\Marzo')
 #bs = todo.dfBs

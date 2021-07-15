@@ -1,3 +1,4 @@
+from psycopg2.errors import ForeignKeyViolation
 import pandas as pd
 import glob as gb
 import csv
@@ -13,7 +14,7 @@ class linea_cir_load:
         self.nombre_archivo = '\\REPORTES DE CIR'
         for file in gb.glob(self.ruta + self.nombre_archivo + '*.xlsx'):
             self.ruta = file
-        self.df = pd.read_excel(self.ruta, usecols = 'G,J,T,X', header=0, sheet_name = "CONSOLIDADO", index_col=False, skiprows=11, keep_default_na=True, dtype=str)
+        self.df = pd.read_excel(self.ruta, usecols = 'G,J,S,W', header=0, sheet_name = "CONSOLIDADO", index_col=False, skiprows=11, keep_default_na=True, dtype=str)
         self.df = self.df.rename(columns={self.df.columns[0]: 'estatus', self.df.columns[1]: 'mis', self.df.columns[2]: 'montoBs', self.df.columns[3]: 'montoDolar'})
         self.df = self.df[(self.df["estatus"] == "VIGENTE")]
         self.df['montoBs'] = self.df['montoBs'].astype(float)
@@ -59,7 +60,42 @@ class linea_cir_load:
         return pd.merge(dfBs, dfDolar, how='outer', right_on='mis', left_on='mis').groupby(['mis'], as_index=False).agg({'Línea/CIR Monto Vigente aprobado (Bs.)': sum, 'Línea/CIR Monto Vigente aprobado (USD)': sum})
     
     def to_csv(self):
-        self.dfBs.to_csv(self.rutaOrigin + '\\rchivos csv\lineaBs.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
-        self.dfDolar.to_csv(self.rutaOrigin + '\\rchivos csv\lineaDolar.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        self.dfBs.to_csv(self.rutaOrigin + '\\rchivos csv\lineaBs.csv', index = False, header=True, sep='|', encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
+        self.dfDolar.to_csv(self.rutaOrigin + '\\rchivos csv\lineaDolar.csv', index = False, header=True, sep='|', encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
+    
+    def insertPg(self, conector):
+        print("Insertando CIR y Líneas en Bolívares")
+        for indice_fila, fila in self.dfBs.iterrows():
+            try:
+                conector.cursor.execute("INSERT INTO LINEA_BS (linbs_mis, linbs_monto, linbs_fecha) VALUES(%s, %s, %s)", 
+                               (fila["mis"], 
+                               fila["montoBs"], 
+                               fila["fecha"]))
+            except ForeignKeyViolation:
+                pass
+            except Exception as excep:
+                print(type(excep))
+                print(excep.args)
+                print(excep)
+                print("linea cir")
+            finally:
+                conector.conn.commit()
+                
+        print("Insertando CIR y Líneas en Dólares")
+        for indice_fila, fila in self.dfDolar.iterrows():
+            try:
+                conector.cursor.execute("INSERT INTO LINEA_DOLAR (lind_mis, lind_monto, lind_fecha) VALUES(%s, %s, %s)", 
+                               (fila["mis"], 
+                               fila["montoDolar"], 
+                               fila["fecha"]))
+            except ForeignKeyViolation:
+                pass
+            except Exception as excep:
+                print(type(excep))
+                print(excep.args)
+                print(excep)
+                print("linea cir")
+            finally:
+                conector.conn.commit()
     
 #pf = linea_cir_load(r'C:\Users\José Prieto\Documents\Bancaribe\Enero', "29/01/2021").df

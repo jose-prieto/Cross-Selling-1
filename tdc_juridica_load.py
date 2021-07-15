@@ -1,7 +1,8 @@
+from psycopg2.errors import ForeignKeyViolation
 import pandas as pd
 import glob as gb
 import csv
-#Maestro de Tarjetas MDP Enero 2021 v3
+
 class tdc_juridica_load:
     
     #Constructor
@@ -20,7 +21,7 @@ class tdc_juridica_load:
         self.nombre_archivo = '\\Maestro de Tarjetas MDP'
         for file in gb.glob(self.ruta + self.nombre_archivo + '*.xlsx'):
             self.ruta = file
-        self.dfPersona = pd.read_excel(self.ruta, usecols = 'A:O', header=0, index_col=False, keep_default_na=True, dtype=str)
+        self.dfPersona = pd.read_excel(self.ruta, usecols = 'A:O', header=0, sheet_name = "TDC ACTIVAS", index_col=False, keep_default_na=True, dtype=str)
         self.dfPersona = self.dfPersona.rename(columns={"Codigo cliente": 'mis'})
         print("TDC Personas totales: ", len(self.dfPersona.index))
         
@@ -39,6 +40,23 @@ class tdc_juridica_load:
         return df.groupby(['mis'], as_index=False).agg({'TDC Jurídica': 'first'})
     
     def to_csv(self):
-        self.df.to_csv(self.rutaOrigin + '\\rchivos csv\\tdc_juridico.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        self.df.to_csv(self.rutaOrigin + '\\rchivos csv\\tdc_juridico.csv', index = False, header=True, sep='|', encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
+    
+    def insertPg(self, conector):
+        print("Insertando tdc")
+        for indice_fila, fila in self.df.iterrows():
+            try:
+                conector.cursor.execute("INSERT INTO TDC (tdc_mis, tdc_fecha) VALUES(%s, %s)", 
+                               (fila["mis"], 
+                               fila["fecha"]))
+            except ForeignKeyViolation:
+                pass
+            except Exception as excep:
+                print(type(excep))
+                print(excep.args)
+                print(excep)
+                print("tdc")
+            finally:
+                conector.conn.commit()
     
 #pf = linea_cir_load(r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Enero').df

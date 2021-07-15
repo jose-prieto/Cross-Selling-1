@@ -1,14 +1,14 @@
-import pandas as pd
-import csv
-from cash.pap_load import pap_load
-from cash.nom_load import nom_load
-#from cash.dedicheq_load import dedicheq_load
-from cash.pet_load import pet_load
-from cash.ppt_load import ppt_load
-from cash.dom_load import dom_load
+from psycopg2.errors import ForeignKeyViolation
 from cash.edi_dom_load import edi_dom_load
 from cash.edi_nom_load import edi_nom_load
 from cash.edi_pap_load import edi_pap_load
+from cash.pap_load import pap_load
+from cash.nom_load import nom_load
+from cash.pet_load import pet_load
+from cash.ppt_load import ppt_load
+from cash.dom_load import dom_load
+import pandas as pd
+import csv
 
 class cash_load:
     
@@ -18,19 +18,22 @@ class cash_load:
         self.crear_excel(ruta)
         input("Vacíe la información necesaria en el archivo de excel recién creado 'cash_llena.xlsx' en la ruta:\n\n" + ruta + "\n\ny luego presione Enter")
         self.ruta = ruta
+        self.EdiDom = edi_dom_load(ruta, cartera, fecha).df
+        self.EdiPap = edi_pap_load(ruta, cartera, fecha).df
+        self.EdiNom = edi_nom_load(ruta, cartera, fecha).df
+        
         self.dfPap = pd.concat([pap_load(ruta, cartera, fecha).df.dropna(axis=0, how='any'), 
-                                edi_pap_load(ruta, cartera, fecha).df.dropna(axis=0, how='any')]).groupby(['mis']).sum().reset_index()
+                                self.EdiPap.dropna(axis=0, how='any')]).groupby(['mis']).sum().reset_index()
         self.dfnom = pd.concat([nom_load(ruta, cartera, fecha).df.dropna(axis=0, how='any'), 
-                                edi_nom_load(ruta, cartera, fecha).df.dropna(axis=0, how='any')]).groupby(['mis']).sum().reset_index()
+                                self.EdiNom.dropna(axis=0, how='any')]).groupby(['mis']).sum().reset_index()
         #self.dfdedicheq = dedicheq_load(ruta, cartera, fecha).df.dropna(axis=0, how='any')
         self.dfpet = pet_load(ruta, cartera, fecha).df.dropna(axis=0, how='any')
         self.dfppt = ppt_load(ruta, cartera, fecha).df.dropna(axis=0, how='any')
         self.dfdom = pd.concat([dom_load(ruta, cartera, fecha).df.dropna(axis=0, how='any'), 
-                                edi_dom_load(ruta, cartera, fecha).df.dropna(axis=0, how='any')]).groupby(['mis']).sum().reset_index()
+                                self.EdiDom.dropna(axis=0, how='any')]).groupby(['mis']).sum().reset_index()
         
-        self.dfEdi = pd.concat([edi_dom_load(ruta, cartera, fecha).df, 
-                                edi_nom_load(ruta, cartera, fecha).df, 
-                                edi_pap_load(ruta, cartera, fecha).df]).groupby(['mis']).sum().reset_index().dropna(axis=0, how='any')
+        self.dfEdi = pd.concat([self.EdiDom, self.EdiNom, 
+                                self.EdiPap]).groupby(['mis']).sum().reset_index().dropna(axis=0, how='any')
         """self.dfedidom = edi_dom_load(ruta, cartera, fecha).df
         self.dfedinom = edi_nom_load(ruta, cartera, fecha).df
         self.dfedipap = edi_pap_load(ruta, cartera, fecha).df"""
@@ -41,7 +44,9 @@ class cash_load:
         self.dfpet = self.dfpet.assign(fecha = fecha)
         self.dfppt = self.dfppt.assign(fecha = fecha)
         self.dfdom = self.dfdom.assign(fecha = fecha)
-        self.dfEdi = self.dfEdi.assign(fecha = fecha)
+        self.EdiDom = self.EdiDom.assign(fecha = fecha)
+        self.EdiPap = self.EdiPap.assign(fecha = fecha)
+        self.EdiNom = self.EdiNom.assign(fecha = fecha)
         """self.dfedidom = self.dfedidom.assign(fecha = fecha)
         self.dfedinom = self.dfedinom.assign(fecha = fecha)
         self.dfedipap = self.dfedipap.assign(fecha = fecha)"""
@@ -76,12 +81,43 @@ class cash_load:
         dfdom['monto'] = dfdom['monto'].astype(str)
         for i in range(len(dfdom['monto'])):
             dfdom['monto'][i]=dfdom['monto'][i].replace('.',',')
+            
+        dfEdiDom = self.EdiDom
+        dfEdiDom['monto'] = dfEdiDom['monto'].astype(str)
+        for i in range(len(dfEdiDom['monto'])):
+            dfEdiDom['monto'][i]=dfEdiDom['monto'][i].replace('.',',')
+            
+        dfEdiPap = self.EdiPap
+        dfEdiPap['monto'] = dfEdiPap['monto'].astype(str)
+        for i in range(len(dfEdiPap['monto'])):
+            dfEdiPap['monto'][i]=dfEdiPap['monto'][i].replace('.',',')
+            
+        dfEdiNom = self.EdiNom
+        dfEdiNom['monto'] = dfEdiNom['monto'].astype(str)
+        for i in range(len(dfEdiNom['monto'])):
+            dfEdiNom['monto'][i]=dfEdiNom['monto'][i].replace('.',',')
         
-        dfMonto = pd.merge(dfPap.rename(columns={'monto': 'Pagos a Proveedores'}), dfnom.rename(columns={'monto': 'Nómina'}), how='outer', right_on='mis', left_on='mis')
+        dfMonto = pd.merge(dfPap.rename(columns={'monto': 'Pagos a Proveedores'}), 
+                           dfnom.rename(columns={'monto': 'Nómina'}), how='outer', right_on='mis', left_on='mis')
         #dfMonto = pd.merge(dfMonto, dfdedicheq.rename(columns={'monto': 'Dedicheq'}), how='outer', right_on='mis', left_on='mis')
-        dfMonto = pd.merge(dfMonto, dfPet.rename(columns={'monto': 'Pagos Especiales a Terceros'}), how='outer', right_on='mis', left_on='mis')
-        dfMonto = pd.merge(dfMonto, dfppt.rename(columns={'monto': 'Pagos por Taquilla'}), how='outer', right_on='mis', left_on='mis')
-        return pd.merge(dfMonto, dfdom.rename(columns={'monto': 'Domiciliación'}), how='outer', right_on='mis', left_on='mis').groupby(['mis'], as_index=False).agg({'Pagos a Proveedores': 'first', 'Nómina': 'first', 'Pagos Especiales a Terceros': 'first', 'Pagos por Taquilla': 'first', 'Domiciliación': 'first'})
+        dfMonto = pd.merge(dfMonto, dfPet.rename(columns={'monto': 'Pagos Especiales a Terceros'}), 
+                           how='outer', right_on='mis', left_on='mis')
+        dfMonto = pd.merge(dfMonto, dfppt.rename(columns={'monto': 'Pagos por Taquilla'}), 
+                           how='outer', right_on='mis', left_on='mis')
+        dfMonto = pd.merge(dfMonto, dfdom.rename(columns={'monto': 'Domiciliación'}), 
+                           how='outer', right_on='mis', left_on='mis')
+        dfMonto = pd.merge(dfMonto, dfEdiDom.rename(columns={'monto': 'Domiciliación con EDI'}), 
+                           how='outer', right_on='mis', left_on='mis')
+        dfMonto = pd.merge(dfMonto, dfEdiPap.rename(columns={'monto': 'Pagos a Proveedores con EDI'}), 
+                           how='outer', right_on='mis', left_on='mis')
+        return pd.merge(dfMonto, dfEdiNom.rename(columns={'monto': 'Pago de nóminas con EDI'}), 
+                        how='outer', right_on='mis', left_on='mis').groupby(['mis'], 
+                            as_index=False).agg({'Pagos a Proveedores': 'first', 'Nómina': 'first', 
+                                'Pagos Especiales a Terceros': 'first', 'Pagos por Taquilla': 'first', 
+                                'Domiciliación': 'first', 'Domiciliación con EDI': 'first', 
+                                'Pagos a Proveedores con EDI': 'first', 'Pago de nóminas con EDI': 'first'})
+        
+        
     
     def get_usable(self):
         dfPap = self.dfPap.assign(uso = 1)
@@ -127,64 +163,154 @@ class cash_load:
         writer.save()
     
     def to_csv(self):
-        self.dfPap.df['monto'] = self.dfPap.df['monto'].astype(str)
-        for i in range(len(self.dfPap.df['monto'])):
-            self.dfPap.df['monto'][i]=self.dfPap.df['monto'][i].replace('.',',')
-        self.dfPap.df.to_csv(self.ruta + '\\rchivos csv\\pap.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        self.dfPap['monto'] = self.dfPap['monto'].astype(str)
+        self.dfPap.to_csv(self.ruta + '\\rchivos csv\\pap.csv', index = False, header=True, sep='|', encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
         
-        self.dfnom.df['monto'] = self.dfnom.df['monto'].astype(str)
-        for i in range(len(self.dfnom.df['monto'])):
-            self.dfnom.df['monto'][i]=self.dfnom.df['monto'][i].replace('.',',')
-        self.dfnom.df.to_csv(self.ruta + '\\rchivos csv\\nom.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        self.dfnom['monto'] = self.dfnom['monto'].astype(str)
+        self.dfnom.to_csv(self.ruta + '\\rchivos csv\\nom.csv', index = False, header=True, sep='|', encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
         
         """self.dfdedicheq.df['monto'] = self.dfdedicheq.df['monto'].astype(str)
-        for i in range(len(self.dfdedicheq.df['monto'])):
-            self.dfdedicheq.df['monto'][i]=self.dfdedicheq.df['monto'][i].replace('.',',')
-        self.dfdedicheq.df.to_csv(self.ruta + '\\rchivos csv\\dedicheq.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)"""
+        self.dfdedicheq.df.to_csv(self.ruta + '\\rchivos csv\\dedicheq.csv', index = False, header=True, sep='|', encoding='utf-8-sig', quoting=csv.QUOTE_NONE)"""
         
-        self.dfpet.df['monto'] = self.dfpet.df['monto'].astype(str)
-        for i in range(len(self.dfpet.df['monto'])):
-            self.dfpet.df['monto'][i]=self.dfpet.df['monto'][i].replace('.',',')
-        self.dfpet.df.to_csv(self.ruta + '\\rchivos csv\\pet.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        self.dfpet['monto'] = self.dfpet['monto'].astype(str)
+        self.dfpet.to_csv(self.ruta + '\\rchivos csv\\pet.csv', index = False, header=True, sep='|', encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
         
-        self.dfppt.df['monto'] = self.dfppt.df['monto'].astype(str)
-        for i in range(len(self.dfppt.df['monto'])):
-            self.dfppt.df['monto'][i]=self.dfppt.df['monto'][i].replace('.',',')
-        self.dfppt.df.to_csv(self.ruta + '\\rchivos csv\\ppt.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        self.dfppt['monto'] = self.dfppt['monto'].astype(str)
+        self.dfppt.to_csv(self.ruta + '\\rchivos csv\\ppt.csv', index = False, header=True, sep='|', encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
         
-        self.dfdom.df['monto'] = self.dfdom.df['monto'].astype(str)
-        for i in range(len(self.dfdom.df['monto'])):
-            self.dfdom.df['monto'][i]=self.dfdom.df['monto'][i].replace('.',',')
-        self.dfdom.df.to_csv(self.ruta + '\\rchivos csv\\dom.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        self.dfdom.to_csv(self.ruta + '\\rchivos csv\\dom.csv', index = False, header=True, sep='|', encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
         
-        self.dfedidom.df['monto'] = self.dfedidom.df['monto'].astype(str)
-        for i in range(len(self.dfedidom.df['monto'])):
-            self.dfedidom.df['monto'][i]=self.dfedidom.df['monto'][i].replace('.',',')
-        self.dfedidom.df.to_csv(self.ruta + '\\rchivos csv\\edidom.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        self.dfEdi['monto'] = self.dfEdi['monto'].astype(str)
+        self.dfEdi.to_csv(self.ruta + '\\rchivos csv\\edi.csv', index = False, header=True, sep='|', encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
+    
+    def insertPg(self, conector):
+        print("Insertando pap")
+        for indice_fila, fila in self.dfPap.iterrows():
+            try:
+                conector.cursor.execute("INSERT INTO PAP (pap_mis, pap_monto, pap_fecha) VALUES(%s, %s, %s)", 
+                               (fila["mis"], 
+                               fila["monto"], 
+                               fila["fecha"]))
+            except ForeignKeyViolation:
+                pass
+            except Exception as excep:
+                print(type(excep))
+                print(excep.args)
+                print(excep)
+            finally:
+                conector.conn.commit()
         
-        self.dfedinom.df['monto'] = self.dfedinom.df['monto'].astype(str)
-        for i in range(len(self.dfedinom.df['monto'])):
-            self.dfedinom.df['monto'][i]=self.dfedinom.df['monto'][i].replace('.',',')
-        self.dfedinom.df.to_csv(self.ruta + '\\rchivos csv\\edinom.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        print("Insertando nom")
+        for indice_fila, fila in self.dfnom.iterrows():
+            try:
+                conector.cursor.execute("INSERT INTO NOM (nom_mis, nom_monto, nom_fecha) VALUES(%s, %s, %s)", 
+                               (fila["mis"], 
+                               fila["monto"], 
+                               fila["fecha"]))
+            except ForeignKeyViolation:
+                pass
+            except Exception as excep:
+                print(type(excep))
+                print(excep.args)
+                print(excep)
+            finally:
+                conector.conn.commit()
         
-        self.dfedipap.df['monto'] = self.dfedipap.df['monto'].astype(str)
-        for i in range(len(self.dfedipap.df['monto'])):
-            self.dfedipap.df['monto'][i]=self.dfedipap.df['monto'][i].replace('.',',')
-        self.dfedipap.df.to_csv(self.ruta + '\\rchivos csv\\edipap.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        print("Insertando pet")
+        for indice_fila, fila in self.dfpet.iterrows():
+            try:
+                conector.cursor.execute("INSERT INTO PET (pet_mis, pet_monto, pet_fecha) VALUES(%s, %s, %s)", 
+                               (fila["mis"], 
+                               fila["monto"], 
+                               fila["fecha"]))
+            except ForeignKeyViolation:
+                pass
+            except Exception as excep:
+                print(type(excep))
+                print(excep.args)
+                print(excep)
+            finally:
+                conector.conn.commit()
         
-    """def insertDfAccess(self,df):
-        try:
-            cursor = self.conn.cursor()
-            for indice_fila, fila in df.iterrows():
-                print("hola")
-                cursor.execute("INSERT INTO UNIFICA ([mis], [rif_cedula], [tipo_persona], [estatus_operacion], [producto], [categoria], [monto contable]) VALUES(?,?,?,?,?,?,?)", fila[" MIS "], fila["Cedula/RIF "], fila[" Tipo Persona "], fila[" Estatus de la Operacion "], fila[" Producto "], fila[" Categoria "], fila[" Monto Contable "])
-        except Exception as inst:
-            print(type(inst))
-            print(inst.args)
-            print(inst)
-        finally:
-            self.conn.commit()
-            self.conn.close()"""
+        print("Insertando ppt")
+        for indice_fila, fila in self.dfppt.iterrows():
+            try:
+                conector.cursor.execute("INSERT INTO PPT (ppt_mis, ppt_monto, ppt_fecha) VALUES(%s, %s, %s)", 
+                               (fila["mis"], 
+                               fila["monto"], 
+                               fila["fecha"]))
+            except ForeignKeyViolation:
+                pass
+            except Exception as excep:
+                print(type(excep))
+                print(excep.args)
+                print(excep)
+            finally:
+                conector.conn.commit()
+        
+        print("Insertando dom")
+        for indice_fila, fila in self.dfdom.iterrows():
+            try:
+                conector.cursor.execute("INSERT INTO DOM (dom_mis, dom_monto, dom_fecha) VALUES(%s, %s, %s)", 
+                               (fila["mis"], 
+                               fila["monto"], 
+                               fila["fecha"]))
+            except ForeignKeyViolation:
+                pass
+            except Exception as excep:
+                print(type(excep))
+                print(excep.args)
+                print(excep)
+            finally:
+                conector.conn.commit()
+        
+        print("Insertando Edi_DOM")
+        for indice_fila, fila in self.EdiDom.iterrows():
+            try:
+                conector.cursor.execute("INSERT INTO EDI_DOM (edi_dom_mis, edi_dom_monto, edi_dom_fecha) VALUES(%s, %s, %s)", 
+                               (fila["mis"], 
+                               fila["monto"], 
+                               fila["fecha"]))
+            except ForeignKeyViolation:
+                pass
+            except Exception as excep:
+                print(type(excep))
+                print(excep.args)
+                print(excep)
+            finally:
+                conector.conn.commit()
+        
+        print("Insertando Edi_PAP")
+        for indice_fila, fila in self.EdiPap.iterrows():
+            try:
+                conector.cursor.execute("INSERT INTO EDI_PAP (edi_pap_mis, edi_pap_monto, edi_pap_fecha) VALUES(%s, %s, %s)", 
+                               (fila["mis"], 
+                               fila["monto"], 
+                               fila["fecha"]))
+            except ForeignKeyViolation:
+                pass
+            except Exception as excep:
+                print(type(excep))
+                print(excep.args)
+                print(excep)
+            finally:
+                conector.conn.commit()
+        
+        print("Insertando Edi_NOM")
+        for indice_fila, fila in self.EdiNom.iterrows():
+            try:
+                conector.cursor.execute("INSERT INTO EDI_NOM (edi_nom_mis, edi_nom_monto, edi_nom_fecha) VALUES(%s, %s, %s)", 
+                               (fila["mis"], 
+                               fila["monto"], 
+                               fila["fecha"]))
+            except ForeignKeyViolation:
+                pass
+            except Exception as excep:
+                print(type(excep))
+                print(excep.args)
+                print(excep)
+            finally:
+                conector.conn.commit()
     
 #todo = cash_load(r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Febrero')
 #ccBs = todo.cc_unifica.dfBs

@@ -1,23 +1,66 @@
-import pandas as pd
-import glob as gb
 import pyodbc as pdbc
+import pandas as pd
+import numpy as np
+import glob as gb
 import csv
 
 class cartera_cliente_load:
     
     #Constructor
-    def __init__(self, ruta, rutadb, db, fecha):
+    def __init__(self, ruta, db, fecha):
         print("Creando cartera")
-        self.rutadb = rutadb
-        #self.nombre_archivo = '\Cartera_Cliente'
-        self.nombre_archivo = '\Cartera_'
+        self.nombre_archivo = '\Base de '
         self.rutaOrigin = ruta
         for file in gb.glob(ruta + self.nombre_archivo + '*.accdb'):
             self.ruta = file
+            
+        """opcion = input("1: CORPORATIVO\n2: INSTITUCIONAL\n3: EMPRESA\n4: COMERCIAL\n")
+        if (opcion == "1"):
+            opcion = "CORPORATIVO"
+            self.db = "CORPORATIVO"
+            print("Cargando base de clientes corportativos.")
+        elif (opcion == "2"):
+            opcion = "INSTITUCIONAL"
+            self.db = "INSTITUCIONAL"
+            print("Cargando base de clientes institucionales.")
+        elif (opcion == "3"):
+            opcion = "EMPRESA"
+            self.db = "EMPRESA"
+            print("Cargando base de clientes empresariales.")
+        else:
+            opcion = "Asesor de Negocios Comerciales"
+            self.db = "COMERCIAL"
+            print("Cargando base de clientes comerciales.")"""
+            
         self.conn = pdbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=' + self.ruta)
-        #self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "MIS Grupo", "Grupo Economico", "Cod Of", "Segmento", "Unidad De Negocio", "Región", "Nombre completo" FROM ' + db + ' WHERE "Título" = ?', self.conn, params=["Asesor de Negocios Comerciales"])
-        self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "Segmento Mis", "Unidad De Negocio", "Region", "Nombre del Responsable" FROM ' + db + ' WHERE "TipoResp" = ?', self.conn, params=["Asesor de Negocios Comerciales"])
+        
+        self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "MIS Grupo", "Grupo Economico", "Cod Of", "Segmento", "Unidad De Negocio", "Región", "Código de BC", "Nombre completo", "Título", "Tipo de Atención" FROM ' + db + ' WHERE "Estatus Cliente" <> ?', self.conn, params=["Cancelado"])
+        self.conn.close()
+        
+        """if (opcion == "Asesor de Negocios Comerciales"):
+            self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "MIS Grupo", "Grupo Economico", "Cod Of", "Segmento", "Unidad De Negocio", "Región", "Nombre completo", "Código de BC" FROM ' + db + ' WHERE "Título" = ?', self.conn, params=[opcion])
+        else:
+            self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "MIS Grupo", "Grupo Economico", "Cod Of", "Segmento", "Unidad De Negocio", "Región", "Nombre completo", "Código de BC" FROM ' + db + ' WHERE "Segmento" = ?', self.conn, params=[opcion])"""
+        #self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "Segmento Mis", "Unidad De Negocio", "Region", "Nombre del Responsable" FROM ' + db + ' WHERE "TipoResp" = ?', self.conn, params=["Asesor de Negocios Comerciales"])
+        
+        self.df['Cod Of'] = np.where((self.df['Nombre completo'] == 'ADAN BORGES, ETTSAIDA ELIANA') | (self.df['Nombre completo'] == 'FUENTES PEREZ, JAVIER ANTONIO') | (self.df['Nombre completo'] == 'WENDY, VELIZ'), 'No Gestionable', self.df['Cod Of'])
+        
+        """if (opcion == "CORPORATIVO"):
+            self.df['Cod Of'] = np.where(self.df['Nombre completo'] == 'ADAN BORGES, ETTSAIDA ELIANA', 'No Gestionable', self.df['Cod Of'])
+        elif (opcion == "INSTITUCIONAL"):
+            self.df['Cod Of'] = np.where(self.df['Nombre completo'] == 'FUENTES PEREZ, JAVIER ANTONIO', 'No Gestionable', self.df['Cod Of'])
+        elif (opcion == "EMPRESA"):
+            self.df['Cod Of'] = np.where(self.df['Nombre completo'] == 'WENDY, VELIZ', 'No Gestionable', self.df['Cod Of'])"""
+        
         self.df['CedulaCliente'] = self.df['CedulaCliente'].str.strip()
+        self.df['MIS Grupo'] = np.where(self.df['MIS Grupo'] == 'No Tiene', 0, self.df['MIS Grupo'])
+        self.df['MIS Grupo'] = np.where(self.df['MIS Grupo'] == '', 0, self.df['MIS Grupo'])
+        #self.df['MIS Grupo'] = np.where(self.df['MIS Grupo'] is None, 0, self.df['MIS Grupo'])
+        self.df['Código de BC'] = self.df['Código de BC'].str.replace('bc','')
+        self.df['Grupo Economico'] = np.where(self.df['Grupo Economico'] == 'No Tiene', self.df['NombreCliente'], self.df['Grupo Economico'])
+        self.df['Grupo Economico'] = np.where(self.df['Grupo Economico'] == '', self.df['NombreCliente'], self.df['Grupo Economico'])
+        self.df['Grupo Economico'] = np.where(self.df['Grupo Economico'] == 0, self.df['NombreCliente'], self.df['Grupo Economico'])
+        #self.df['Grupo Economico'] = np.where(self.df['Grupo Economico'] is None, self.df['NombreCliente'], self.df['Grupo Economico'])
         self.df = self.recorrerDF(self.df)
         self.df['MisCliente'] = self.df['MisCliente'].astype(str)
         
@@ -36,41 +79,49 @@ class cartera_cliente_load:
             df.at[indice_fila,"CedulaCliente"] = self.quitarCeros(fila["CedulaCliente"])
         return df
     
-    def to_csv(self):
-        self.df.to_csv(self.rutaOrigin + '\\rchivos csv\cartera.csv', index = False, header=True, sep='|', encoding='UTF-8', quoting=csv.QUOTE_NONE)
-    
-    def insertDf(self):
-        conn = pdbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=' + self.rutadb)
-        cursor = conn.cursor()
-        try:
-            for indice_fila, fila in self.df.iterrows():
-                try:
-                    cursor.execute("INSERT INTO CARTERA ([mis], [rif], [nombre], [segmento], [unidad], [region], [tipo_atencion]) VALUES(?,?,?,?,?,?,?)", 
-                                   fila["MisCliente"], 
-                                   fila["CedulaCliente"], 
-                                   fila["NombreCliente"], 
-                                   fila["Segmento Mis"], 
-                                   fila["Unidad De Negocio"], 
-                                   fila["Region"], 
-                                   fila["Tipo_Atencion"],
-                                   fila["Nombre del Responsable"])
-                except KeyError as llave:
-                    print(type(llave))
-                    print(llave.args)
-                    print(llave)
-                    print("Llave primaria")
-                except Exception as excep:
-                    print(type(excep))
-                    print(excep.args)
-                    print(excep)
-                finally:
-                    conn.commit()
-        except KeyError as llave:
-            print(type(llave))
-            print(llave.args)
-            print(llave)
-        finally:
-            conn.close()
+    def to_csv(self, df):
+        clienteDf = df.groupby(['MIS'], as_index=False).agg({'Mes': 'first', 
+                                                                    'CedulaCliente': 'first', 
+                                                                    'NOMBRE DEL CLIENTE': 'first',
+                                                                    'MIS GRUPO': 'first',
+                                                                    'GRUPO': 'first',
+                                                                    'Segmento': 'first',
+                                                                    'OFICINA': 'first',
+                                                                    'CARTERA': 'first',
+                                                                    'VICEPRESIDENCIA': 'first',
+                                                                    'MIS Responsable': 'first',
+                                                                    'RESPONSABLE': 'first',
+                                                                    'Título Responsable': 'first',
+                                                                    'Tipo de Atención': 'first'})
+        clienteDf.to_csv(self.rutaOrigin + '\\rchivos csv\clientes.csv', index = False, header=True, sep='|', encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
             
-
-#cartera = cartera_cliente_load(r'C:\Users\José Prieto\Documents\Bancaribe\Marzo', 'Cartera_Clientes_Marzo_2021').to_csv()
+    def insertPg(self, conector, df):
+        print("Insertando clientes")
+        for indice_fila, fila in df.iterrows():
+            try:
+                conector.cursor.execute("INSERT INTO CLIENTE (mis, cedula, nombre, mis_grupo, grupo, fecha, segmento, oficina, cartera, vicepresidencia, responsable, mis_responsable, titulo, tipo_atencion) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", 
+                               (fila["MIS"], 
+                               fila["CedulaCliente"], 
+                               fila["NOMBRE DEL CLIENTE"], 
+                               fila["MIS GRUPO"], 
+                               fila["GRUPO"],
+                               fila["Mes"], 
+                               fila["Segmento"], 
+                               fila["OFICINA"], 
+                               fila["CARTERA"], 
+                               fila["VICEPRESIDENCIA"], 
+                               fila["RESPONSABLE"],
+                               fila["MIS Responsable"],
+                               fila["Título Responsable"], 
+                               fila["Tipo de Atención"], 
+                               ))
+            except Exception as excep:
+                print(type(excep))
+                print(excep.args)
+                print(excep)
+                print("cartera")
+                input("Empieza cartera2")
+            finally:
+                conector.conn.commit()
+            
+#cartera = cartera_cliente_load(r'C:\Users\bc221066\Documents\José Prieto\Cross Selling\Enero', 'fesfefs', 'Base_Clientes', '29/01/2021').to_csv()

@@ -1,3 +1,4 @@
+from psycopg2.errors import ForeignKeyViolation
 import pandas as pd
 import glob as gb
 import csv
@@ -40,6 +41,24 @@ class puntos_venta_load:
         return df.groupby(['mis'], as_index=False).agg({'Puntos de Venta': 'first'})
     
     def to_csv(self):
-        self.df.to_csv(self.rutaOrigin + '\\rchivos csv\\puntos_de_venta.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        self.df.to_csv(self.rutaOrigin + '\\rchivos csv\\puntos_de_venta.csv', index = False, header=True, sep='|', encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
+    
+    def insertPg(self, conector):
+        print("Insertando pdv")
+        for indice_fila, fila in self.df.iterrows():
+            try:
+                conector.cursor.execute("INSERT INTO PUNTO_DE_VENTA (pdv_mis, pdv_monto, pdv_fecha) VALUES(%s, %s, %s)", 
+                               (fila["mis"], 
+                               fila["monto"], 
+                               fila["fecha"]))
+            except ForeignKeyViolation:
+                pass
+            except Exception as excep:
+                print(type(excep))
+                print(excep.args)
+                print(excep)
+                print("pdv")
+            finally:
+                conector.conn.commit()
     
 #pf = linea_cir_load(r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Enero').df

@@ -2,19 +2,19 @@ from psycopg2.errors import ForeignKeyViolation
 import pandas as pd
 import csv
 
-class intervencion_tdc_load:
+class intervencion_euro_load:
     
     #Constructor
     def __init__(self, ruta, cartera, fecha):
         self.crear_excel(ruta)
         self.ruta = ruta
-        input("Vacíe la información necesaria en el archivo de excel llamado 'intervencion_tdc_llenar.xlsx' recién creado en la ruta:\n\n" + ruta + "\n\nluego presione Enter")
-        print("Creando intervencion tdc\n")
-        self.df = pd.read_excel(self.ruta + '\intervencion_tdc_llenar.xlsx', usecols = 'A,B', header=0, index_col=False, keep_default_na=True, dtype=str)
+        input("Vacíe la información necesaria en el archivo de excel llamado 'intervencion_euro_llenar.xlsx' recién creado en la ruta:\n\n" + ruta + "\n\nluego presione Enter")
+        print("Creando intervencion euro\n")
+        self.df = pd.read_excel(self.ruta + '\intervencion_euro_llenar.xlsx', usecols = 'A,B', header=0, index_col=False, keep_default_na=True, dtype=str)
         self.df['montoVenta'] = self.df['montoVenta'].astype(float)
         self.df['rif'] = self.df['rif'].str.strip()
         
-        print("Intervención tdc venta: ", self.df['montoVenta'].sum(), "\n")
+        print("Intervención euro venta: ", self.df['montoVenta'].sum(), "\n")
         
         self.df = self.recorrerDF(self.df)
         self.df = pd.merge(self.df, cartera, how='inner', right_on='CedulaCliente', left_on='rif')
@@ -30,14 +30,14 @@ class intervencion_tdc_load:
         for i in range(len(df['monto'])):
             df['monto'][i]=df['monto'][i].replace('.',',')
             
-        return df.rename(columns={'monto': 'Intervención TDC Venta'})
+        return df.rename(columns={'monto': 'Intervención EURO Venta'})
         
     
     def get_usable(self):
         df = self.df.assign(uso = 1)
-        df = df.rename(columns={'uso': 'Intervención TDC Venta'})
+        df = df.rename(columns={'uso': 'Intervención EURO Venta'})
         
-        return df.groupby(['mis'], as_index=False).agg({'Intervención TDC Venta': 'first'})
+        return df.groupby(['mis'], as_index=False).agg({'Intervención EURO Venta': 'first'})
 
     def quitarCeros(self, rifCliente):
         aux = rifCliente[1:]
@@ -51,19 +51,19 @@ class intervencion_tdc_load:
         return df
         
     def crear_excel(self, ruta):
-        writer = pd.ExcelWriter(ruta + '\intervencion_tdc_llenar.xlsx')
+        writer = pd.ExcelWriter(ruta + '\intervencion_euro_llenar.xlsx')
         df = pd.DataFrame(columns = ['rif', 'montoVenta'])
         df.to_excel(writer, index=False)
         writer.save()
     
     def to_csv(self):
-        self.df.to_csv(self.ruta + '\\rchivos csv\intervencion_tdc.csv', index = False, header=True, sep='|', encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
+        self.df.to_csv(self.ruta + '\\rchivos csv\intervencion_euro.csv', index = False, header=True, sep='|', encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
     
     def insertPg(self, conector):
-        print("Insertando intervención tdc")
+        print("Insertando intervención Euro")
         for indice_fila, fila in self.df.iterrows():
             try:
-                conector.cursor.execute("INSERT INTO INTERVENCION_TDC (int_mis, int_monto, int_fecha) VALUES(%s, %s, %s)", 
+                conector.cursor.execute("INSERT INTO INTERVENCION_EURO (inteu_mis, inteu_monto, inteu_fecha) VALUES(%s, %s, %s)", 
                                (fila["mis"], 
                                fila["monto"], 
                                fila["fecha"]))

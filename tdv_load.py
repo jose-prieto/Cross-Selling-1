@@ -2,6 +2,7 @@ from rrgg.rrgg_institucional_load import rrgg_institucional_load
 from ahorro_corriente.pf_unifica_load import pf_unifica_load
 from rrgg.rrgg_corporativo_load import rrgg_corporativo_load
 from rrgg.rrgg_empresa_load import rrgg_empresa_load
+from psycopg2.errors import ForeignKeyViolation
 from rrgg.rrgg_pyme_load import rrgg_pyme_load
 import pandas as pd
 import csv
@@ -44,4 +45,22 @@ class tdv_load:
         return df.groupby(['mis'], as_index=False).agg({'TDV': 'first'})
     
     def to_csv(self):
-        self.df.to_csv(self.ruta + '\\rchivos csv\\tdv.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
+        self.df.to_csv(self.ruta + '\\rchivos csv\\tdv.csv', index = False, header=True, sep='|', encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
+    
+    def insertPg(self, conector):
+        print("Insertando tdv")
+        for indice_fila, fila in self.df.iterrows():
+            try:
+                conector.cursor.execute("INSERT INTO TDV (tdv_mis, tdv_monto, tdv_fecha) VALUES(%s, %s, %s)", 
+                               (fila["mis"], 
+                               fila["monto"], 
+                               fila["fecha"]))
+            except ForeignKeyViolation:
+                pass
+            except Exception as excep:
+                print(type(excep))
+                print(excep.args)
+                print(excep)
+                print("tdv")
+            finally:
+                conector.conn.commit()

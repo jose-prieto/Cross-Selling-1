@@ -4,8 +4,6 @@ import csv
 
 class cc_unifica_load:
     
-    #conn = pdbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=C:\Users\José Prieto\Documents\Bancaribe\Enero\CrossSelling.accdb')
-    
     #Constructor
     def __init__(self, ruta, cartera):
         self.nombre_archivo = '\cc_unifica'
@@ -44,20 +42,6 @@ class cc_unifica_load:
         self.dfEuro = self.dfEuro[(self.dfEuro[" Monto Contable "] > 0)]
         self.dfEuro = self.dfEuro.rename(columns={' MIS ': 'mis', ' Monto Contable ': 'monto'})
         print("cc_unifica Euros monto total: ", self.dfEuro['monto'].sum())
-        
-    """def insertDfAccess(self,df):
-        try:
-            cursor = self.conn.cursor()
-            for indice_fila, fila in df.iterrows():
-                print("hola")
-                cursor.execute("INSERT INTO UNIFICA ([mis], [rif_cedula], [tipo_persona], [estatus_operacion], [producto], [categoria], [monto contable]) VALUES(?,?,?,?,?,?,?)", fila[" MIS "], fila["Cedula/RIF "], fila[" Tipo Persona "], fila[" Estatus de la Operacion "], fila[" Producto "], fila[" Categoria "], fila[" Monto Contable "])
-        except Exception as inst:
-            print(type(inst))
-            print(inst.args)
-            print(inst)
-        finally:
-            self.conn.commit()
-            self.conn.close()"""
     
     def to_csv(self):
         self.dfBs.to_csv(self.rutaOrigin + '\\rchivos csv\cc_unifica_BS.csv', index = False, header=True, sep='|', encoding='latin-1', quoting=csv.QUOTE_NONE)
