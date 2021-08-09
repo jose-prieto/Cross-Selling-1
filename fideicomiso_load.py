@@ -14,16 +14,18 @@ class fideicomiso_load:
         self.nombre_archivo = '\\REPORTE DE CAPITALES '
         for file in gb.glob(self.ruta + self.nombre_archivo + '*.xlsx'):
             self.ruta = file
-        self.df = pd.read_excel(self.ruta, usecols = 'C:D', header=0, index_col=False, keep_default_na=True, dtype=str)
-        self.df = self.df.rename(columns={self.df.columns[0]: 'letra', self.df.columns[1]: 'rif'})
+        self.df = pd.read_excel(self.ruta, usecols = 'B,C,E', header=0, index_col=False, keep_default_na=True, dtype=str)
+        self.df = self.df.rename(columns={self.df.columns[0]: 'letra', self.df.columns[1]: 'rif', self.df.columns[2]: 'monto'})
         self.df["rif"] = self.df["letra"] + self.df["rif"]
+        self.df['monto'] = self.df['monto'].astype(float)
+        self.df = self.df[(self.df["monto"] > 0)]
         self.df = self.recorrerDF(self.df)
         
-        print("clientes con fideicomiso: ", len(self.df.index), "\n")
+        print("Total fideicomiso: ", self.df['monto'].sum(), "\n")
         
         self.df = pd.merge(self.df, cartera, how='inner', right_on='CedulaCliente', left_on='rif')
-        self.df = self.df.groupby(['MisCliente'], as_index=False).agg({'MisCliente': 'first'})
         self.df = self.df.rename(columns={'MisCliente': 'mis'})
+        self.df = self.df.groupby(['mis'], as_index=False).agg({'monto': sum})
         
         self.df = self.df.assign(fecha = self.fecha)
 
@@ -42,10 +44,20 @@ class fideicomiso_load:
     
     def get_usable(self):
         df = self.df.assign(uso = 1)
-        df = df.rename(columns={'uso': 'FIDEICOMISO'})
-        df = df.groupby(['mis'], as_index=False).agg({'FIDEICOMISO': sum})
+        df = df.rename(columns={'uso': 'Fideicomiso'})
+        df = df.groupby(['mis'], as_index=False).agg({'Fideicomiso': sum})
         
         return df
+        
+    def get_monto(self):
+        df = self.df
+        df['monto'] = df['monto'].astype(str)
+        for i in range(len(df['monto'])):
+            df['monto'][i]=df['monto'][i].replace('.',',')
+            
+        df = df.rename(columns={'monto': 'Fideicomiso'})
+        
+        return df.groupby(['mis'], as_index=False).agg({'Fideicomiso': 'first'})
     
     def to_csv(self):
         self.df.to_csv(self.rutaOrigin + '\\rchivos csv\\fideicomiso.csv', index = False, header=True, sep='|', encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
@@ -54,8 +66,9 @@ class fideicomiso_load:
         print("Insertando fideicomiso")
         for indice_fila, fila in self.df.iterrows():
             try:
-                conector.cursor.execute("INSERT INTO FIDEICOMISO (fid_mis, fid_fecha) VALUES(%s, %s)", 
+                conector.cursor.execute("INSERT INTO FIDEICOMISO (fid_mis, fid_monto, fid_fecha) VALUES(%s, %s, %s)", 
                                (fila["mis"], 
+                                fila["monto"], 
                                fila["fecha"]))
             except ForeignKeyViolation:
                 pass

@@ -12,16 +12,18 @@ class tdc_juridica_load:
         self.rutaOrigin = ruta
         self.ruta = ruta
         self.nombre_archivo = '\\Maestro de Tarjetas Clientes'
-        for file in gb.glob(self.ruta + self.nombre_archivo + '*.xlsx'):
-            self.ruta = file
-        self.df = pd.read_excel(self.ruta, usecols = 'A:O', header=0, sheet_name = "CUENTAS MADRES JURIDICAS", index_col=False, keep_default_na=True, dtype=str)
+        ruta_cambiante = self.ruta
+        for file in gb.glob(ruta_cambiante + self.nombre_archivo + '*.xlsx'):
+            ruta_cambiante = file
+        self.df = pd.read_excel(ruta_cambiante, usecols = 'A:O', header=0, sheet_name = "CUENTAS MADRES JURIDICAS", index_col=False, keep_default_na=True, dtype=str)
         self.df = self.df.rename(columns={"Codigo cliente": 'mis'})
         print("TDC Juridico totales: ", len(self.df.index))
         
+        ruta_cambiante = self.ruta
         self.nombre_archivo = '\\Maestro de Tarjetas MDP'
-        for file in gb.glob(self.ruta + self.nombre_archivo + '*.xlsx'):
-            self.ruta = file
-        self.dfPersona = pd.read_excel(self.ruta, usecols = 'A:O', header=0, sheet_name = "TDC ACTIVAS", index_col=False, keep_default_na=True, dtype=str)
+        for file in gb.glob(ruta_cambiante + self.nombre_archivo + '*.xlsx'):
+            ruta_cambiante = file
+        self.dfPersona = pd.read_excel(ruta_cambiante, usecols = 'A:O', header=0, index_col=False, keep_default_na=True, dtype=str)
         self.dfPersona = self.dfPersona.rename(columns={"Codigo cliente": 'mis'})
         print("TDC Personas totales: ", len(self.dfPersona.index))
         

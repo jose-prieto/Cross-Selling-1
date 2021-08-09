@@ -173,7 +173,9 @@ class unifica_load:
                 conector.conn.commit()
     
     def to_csv(self, df):
-        self.dfBs.to_csv(self.ruta + '\\rchivos csv\corriente_ahorro.csv', index = False, header=True, sep='|', 
+        self.ahorro.to_csv(self.ruta + '\\rchivos csv\corriente_ahorro.csv', index = False, header=True, sep='|', 
+                         encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
+        self.corriente.to_csv(self.ruta + '\\rchivos csv\corriente_ahorro.csv', index = False, header=True, sep='|', 
                          encoding='utf-8-sig', quoting=csv.QUOTE_NONE)
         self.dfDolar.to_csv(self.ruta + '\\rchivos csv\convenio20_convenio1.csv', index = False, header=True, sep='|', 
                             encoding='utf-8-sig', quoting=csv.QUOTE_NONE)

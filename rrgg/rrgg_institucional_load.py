@@ -9,7 +9,7 @@ class rrgg_institucional_load:
         self.rutaOrigin = ruta
         self.ruta = ruta
         self.nombre_archivo = '\\rrgg institucional'
-        for file in gb.glob(self.ruta + self.nombre_archivo + '*.xls'):
+        for file in gb.glob(self.ruta + self.nombre_archivo + '*.xlsx'):
             self.ruta = file
         self.df = pd.read_excel(self.ruta, usecols = 'A:M', header=0, index_col=False, keep_default_na=True, dtype=str)
         self.df = self.df[(self.df["Producto Ajustado"] == "TDV") | 

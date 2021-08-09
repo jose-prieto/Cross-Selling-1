@@ -13,54 +13,34 @@ class cartera_cliente_load:
         self.rutaOrigin = ruta
         for file in gb.glob(ruta + self.nombre_archivo + '*.accdb'):
             self.ruta = file
-            
-        """opcion = input("1: CORPORATIVO\n2: INSTITUCIONAL\n3: EMPRESA\n4: COMERCIAL\n")
-        if (opcion == "1"):
-            opcion = "CORPORATIVO"
-            self.db = "CORPORATIVO"
-            print("Cargando base de clientes corportativos.")
-        elif (opcion == "2"):
-            opcion = "INSTITUCIONAL"
-            self.db = "INSTITUCIONAL"
-            print("Cargando base de clientes institucionales.")
-        elif (opcion == "3"):
-            opcion = "EMPRESA"
-            self.db = "EMPRESA"
-            print("Cargando base de clientes empresariales.")
-        else:
-            opcion = "Asesor de Negocios Comerciales"
-            self.db = "COMERCIAL"
-            print("Cargando base de clientes comerciales.")"""
-            
-        self.conn = pdbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=' + self.ruta)
         
-        self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "MIS Grupo", "Grupo Economico", "Cod Of", "Segmento", "Unidad De Negocio", "Región", "Código de BC", "Nombre completo", "Título", "Tipo de Atención" FROM ' + db + ' WHERE "Estatus Cliente" <> ?', self.conn, params=["Cancelado"])
-        self.conn.close()
-        
-        """if (opcion == "Asesor de Negocios Comerciales"):
-            self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "MIS Grupo", "Grupo Economico", "Cod Of", "Segmento", "Unidad De Negocio", "Región", "Nombre completo", "Código de BC" FROM ' + db + ' WHERE "Título" = ?', self.conn, params=[opcion])
-        else:
-            self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "MIS Grupo", "Grupo Economico", "Cod Of", "Segmento", "Unidad De Negocio", "Región", "Nombre completo", "Código de BC" FROM ' + db + ' WHERE "Segmento" = ?', self.conn, params=[opcion])"""
-        #self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "Segmento Mis", "Unidad De Negocio", "Region", "Nombre del Responsable" FROM ' + db + ' WHERE "TipoResp" = ?', self.conn, params=["Asesor de Negocios Comerciales"])
+        """try:
+            self.conn = pdbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=' + self.ruta)
+            self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "NombreCliente", "MIS Grupo", "Grupo Economico", "Cod Of", "Segmento", "Unidad De Negocio", "Región", "Código de BC", "Nombre completo", "Título", "Tipo de Atención" FROM ' + db + ' WHERE "Estatus Cliente" <> ?', self.conn, params=["Cancelado"])
+        except Exception as err:
+            print(err)
+            input("Error presione contrl + C")
+        finally:
+            self.conn.close()"""
+            
+        try:
+            self.conn = pdbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=' + self.ruta)
+            self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "Estatus Cliente", "NombreCliente", "MIS Grupo", "Grupo Economico", "Cod Of", "Segmento", "Unidad De Negocio", "Región", "Código de BC", "Nombre completo", "Título", "Tipo de Atención" FROM ' + db + ' WHERE ("Segmento" = ? OR "Segmento" = ? OR "Segmento" = ? OR "Segmento" = ?) AND "Estatus Cliente" = ?', self.conn, params=["BANCA PREMIUM", "PERSONAS", "PYME", "MICROEMPRESARIO POPULAR", "Activo"])
+        except Exception as err:
+            print(err)
+            input("Error presione contrl + C")
+        finally:
+            self.conn.close()
         
         self.df['Cod Of'] = np.where((self.df['Nombre completo'] == 'ADAN BORGES, ETTSAIDA ELIANA') | (self.df['Nombre completo'] == 'FUENTES PEREZ, JAVIER ANTONIO') | (self.df['Nombre completo'] == 'WENDY, VELIZ'), 'No Gestionable', self.df['Cod Of'])
-        
-        """if (opcion == "CORPORATIVO"):
-            self.df['Cod Of'] = np.where(self.df['Nombre completo'] == 'ADAN BORGES, ETTSAIDA ELIANA', 'No Gestionable', self.df['Cod Of'])
-        elif (opcion == "INSTITUCIONAL"):
-            self.df['Cod Of'] = np.where(self.df['Nombre completo'] == 'FUENTES PEREZ, JAVIER ANTONIO', 'No Gestionable', self.df['Cod Of'])
-        elif (opcion == "EMPRESA"):
-            self.df['Cod Of'] = np.where(self.df['Nombre completo'] == 'WENDY, VELIZ', 'No Gestionable', self.df['Cod Of'])"""
         
         self.df['CedulaCliente'] = self.df['CedulaCliente'].str.strip()
         self.df['MIS Grupo'] = np.where(self.df['MIS Grupo'] == 'No Tiene', 0, self.df['MIS Grupo'])
         self.df['MIS Grupo'] = np.where(self.df['MIS Grupo'] == '', 0, self.df['MIS Grupo'])
-        #self.df['MIS Grupo'] = np.where(self.df['MIS Grupo'] is None, 0, self.df['MIS Grupo'])
         self.df['Código de BC'] = self.df['Código de BC'].str.replace('bc','')
         self.df['Grupo Economico'] = np.where(self.df['Grupo Economico'] == 'No Tiene', self.df['NombreCliente'], self.df['Grupo Economico'])
         self.df['Grupo Economico'] = np.where(self.df['Grupo Economico'] == '', self.df['NombreCliente'], self.df['Grupo Economico'])
         self.df['Grupo Economico'] = np.where(self.df['Grupo Economico'] == 0, self.df['NombreCliente'], self.df['Grupo Economico'])
-        #self.df['Grupo Economico'] = np.where(self.df['Grupo Economico'] is None, self.df['NombreCliente'], self.df['Grupo Economico'])
         self.df = self.recorrerDF(self.df)
         self.df['MisCliente'] = self.df['MisCliente'].astype(str)
         

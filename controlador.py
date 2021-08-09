@@ -68,7 +68,8 @@ class controlador:
                                                                                           'Código de BC': 'first',
                                                                                           'Nombre completo': 'first',
                                                                                           'Título': 'first',
-                                                                                          'Tipo de Atención': 'first'})
+                                                                                          'Tipo de Atención': 'first',
+                                                                                          'Estatus Cliente': 'first'})
         
         self.cargaDatos.cartera.df = self.cargaDatos.cartera.df.rename(columns={'MisCliente': 'MIS', 
                                                                                 'fecha': 'Mes', 
@@ -97,6 +98,7 @@ class controlador:
         carteraMonto = pd.merge(carteraMonto, self.puntos_venta.get_monto(), how='outer', left_on='mis', right_on='mis')
         carteraMonto = pd.merge(carteraMonto, self.p2c.get_monto(), how='outer', left_on='mis', right_on='mis')
         carteraMonto = pd.merge(carteraMonto, self.p2p.get_monto(), how='outer', left_on='mis', right_on='mis')
+        carteraMonto = pd.merge(carteraMonto, self.fideicomiso.get_monto(), how='outer', left_on='mis', right_on='mis')
         return carteraMonto
     
     def crear_cartera_clientes(self):
@@ -126,9 +128,9 @@ class controlador:
         print("montos luego: ",len(clientes.index))
         print("usables luego: ",len(montos.index))
         
-        writer = pd.ExcelWriter(self.ruta + '\\rchivos csv\Cross-Selling--2021-.xlsx')
-        clientes.to_excel(writer, sheet_name="CS Clientes", index=False, startrow=8, freeze_panes=(9,5))
-        montos.to_excel(writer, sheet_name="Montos por Producto Cliente", index=False, startrow=8, freeze_panes=(9,5))
+        writer = pd.ExcelWriter(self.ruta + '\\rchivos csv\Cross-Selling---2021.xlsx')
+        clientes.to_excel(writer, sheet_name="CS Clientes", index=False)
+        montos.to_excel(writer, sheet_name="Montos por Producto Cliente", index=False)
         writer.save()
         
     def crear_csv(self, df):
@@ -182,7 +184,7 @@ class controlador:
         
     def controlador(self):
         while True:
-            opcion = input("1: Ejecutivo\n2: Comercial\n3: Corporativo\n4: Empresa\n5: Institucional \n6: Recargar data\n\n0: Salir\n")
+            opcion = input("1: Ejecutivo\n2: Comercial\n3: Corporativo\n4: Empresa\n5: Institucional\n6: Personas\n7: Banca Premium\n8: Pyme\n9: Microempresario popular\n10: Recargar data\n\n0: Salir\n")
             if(opcion == "1"):
                 self.insertPg(self.cargaDatos.cartera.df, "EJECUTIVO")
             elif(opcion == "2"):
@@ -192,7 +194,7 @@ class controlador:
                     self.insertPg(df, "COMERCIAL")
                 elif(opcion == "2"):
                     self.crear_excel(df)
-                    self.crear_csv(df)
+                    #self.crear_csv(df)
                 else:
                     break
             elif(opcion == "3"):
@@ -202,7 +204,7 @@ class controlador:
                     self.insertPg(df, "CORPORATIVO")
                 elif(opcion == "2"):
                     self.crear_excel(df)
-                    self.crear_csv(df)
+                    #self.crear_csv(df)
                 else:
                     break
             elif(opcion == "4"):
@@ -212,7 +214,7 @@ class controlador:
                     self.insertPg(df, "EMPRESA")
                 elif(opcion == "2"):
                     self.crear_excel(df)
-                    self.crear_csv(df)
+                    #self.crear_csv(df)
                 else:
                     break
             elif(opcion == "5"):
@@ -222,10 +224,50 @@ class controlador:
                     self.insertPg(df, "INSTITUCIONAL")
                 elif(opcion == "2"):
                     self.crear_excel(df)
-                    self.crear_csv(df)
+                    #self.crear_csv(df)
                 else:
                     break
             elif(opcion == "6"):
+                df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Segmento"] == "PERSONAS")]
+                opcion = input("1: Insertar en db\n2: Crear Excel y .CSV\n")
+                if(opcion == "1"):
+                    self.insertPg(df, "PERSONAS")
+                elif(opcion == "2"):
+                    self.crear_excel(df)
+                    #self.crear_csv(df)
+                else:
+                    break
+            elif(opcion == "7"):
+                df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Segmento"] == "BANCA PREMIUM")]
+                opcion = input("1: Insertar en db\n2: Crear Excel y .CSV\n")
+                if(opcion == "1"):
+                    self.insertPg(df, "BANCA PREMIUM")
+                elif(opcion == "2"):
+                    self.crear_excel(df)
+                    #self.crear_csv(df)
+                else:
+                    break
+            elif(opcion == "8"):
+                df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Segmento"] == "PYME")]
+                opcion = input("1: Insertar en db\n2: Crear Excel y .CSV\n")
+                if(opcion == "1"):
+                    self.insertPg(df, "PYME")
+                elif(opcion == "2"):
+                    self.crear_excel(df)
+                    #self.crear_csv(df)
+                else:
+                    break
+            elif(opcion == "9"):
+                df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Segmento"] == "MICROEMPRESARIO POPULAR")]
+                opcion = input("1: Insertar en db\n2: Crear Excel y .CSV\n")
+                if(opcion == "1"):
+                    self.insertPg(df, "MICROEMPRESARIO POPULAR")
+                elif(opcion == "2"):
+                    self.crear_excel(df)
+                    #self.crear_csv(df)
+                else:
+                    break
+            elif(opcion == "10"):
                 self.recargar_datos()
             elif(opcion == "0"):
                 print("Cerrando app.")
@@ -234,6 +276,6 @@ class controlador:
                 print("Opción incorrecta.")
         
     #Dirección en pc de archivos fuente, dirección de base de datos destino, nombre de la tabla dentro de la cartera clientes y fecha a asignar a cada registro.
-controlador(r'C:\Users\bc221066\Documents\José Prieto\Cross Selling\Insumos\2021\Mayo', '28/05/2021').controlador()
+controlador(r'C:\Users\bc221066\Documents\José Prieto\Cross Selling\Insumos\2021\Junio', '30/06/2021').controlador()
 
 #contro = controlador(r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Enero', r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Cross Selling', "Cartera_Clientes_Enero_2020", '29/01/2021').insert_db()
