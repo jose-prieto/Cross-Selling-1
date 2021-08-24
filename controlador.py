@@ -121,14 +121,14 @@ class controlador:
         carteraMonto = pd.merge(carteraMonto, self.fideicomiso.get_usable(), how='outer', left_on='mis', right_on='mis')
         return carteraMonto
         
-    def crear_excel(self, df):
+    def crear_excel(self, df, segmento):
         print("Creando excel")
         clientes = pd.merge(df, self.crear_cartera_clientes(), how='inner', left_on='MIS', right_on='mis').fillna(0)
         montos = pd.merge(df, self.crear_cartera_montos(), how='inner', left_on='MIS', right_on='mis').fillna(0)
         print("montos luego: ",len(clientes.index))
         print("usables luego: ",len(montos.index))
         
-        writer = pd.ExcelWriter(self.ruta + '\\rchivos csv\Cross-Selling---2021.xlsx')
+        writer = pd.ExcelWriter(self.ruta + '\\rchivos csv\Cross-Selling-' + segmento + '-Junio-2021.xlsx')
         clientes.to_excel(writer, sheet_name="CS Clientes", index=False)
         montos.to_excel(writer, sheet_name="Montos por Producto Cliente", index=False)
         writer.save()
@@ -184,66 +184,86 @@ class controlador:
         
     def controlador(self):
         while True:
-            opcion = input("1: Ejecutivo\n2: Comercial\n3: Corporativo\n4: Empresa\n5: Institucional\n6: Personas\n7: Banca Premium\n8: Pyme\n9: Microempresario popular\n10: Recargar data\n\n0: Salir\n")
+            opcion = input("1: Ejecutivo\n2: Todos menos ejecutivo y comercial\n3: Comercial\n4: Corporativo\n5: Empresa\n6: Institucional\n7: Personas y banca premium\n8: Pyme\n9: Microempresario popular\n10: Recargar data\n\n0: Salir\n")
             if(opcion == "1"):
                 self.insertPg(self.cargaDatos.cartera.df, "EJECUTIVO")
             elif(opcion == "2"):
+                opcion = input("1: Insertar en db\n2: Crear Excel y .CSV\n")
+                if(opcion == "1"):
+                    df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Título Responsable"] == "Asesor de Negocios Comerciales")]
+                    self.insertPg(df, "COMERCIAL")
+                    df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Segmento"] == "CORPORATIVO")]
+                    self.insertPg(df, "CORPORATIVO")
+                    df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Segmento"] == "EMPRESA")]
+                    self.insertPg(df, "EMPRESA")
+                    df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Segmento"] == "INSTITUCIONAL")]
+                    self.insertPg(df, "INSTITUCIONAL")
+                    df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Tipo de Atención"] == "Estandar")]
+                    self.insertPg(df, "ESTANDAR")
+                elif(opcion == "2"):
+                    df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Título Responsable"] == "Asesor de Negocios Comerciales")]
+                    self.crear_excel(df, "Comercial")
+                    df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Segmento"] == "CORPORATIVO")]
+                    self.crear_excel(df, "Corporativo")
+                    df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Segmento"] == "EMPRESA")]
+                    self.crear_excel(df, "Empresa")
+                    df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Segmento"] == "INSTITUCIONAL")]
+                    self.crear_excel(df, "Institucional")
+                    df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Segmento"] == "PYME")]
+                    self.crear_excel(df, "Pyme")
+                    df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Segmento"] == "MICROEMPRESARIO POPULAR")]
+                    self.crear_excel(df, "Microempresario Popular")
+                    #self.crear_csv(df)
+                else:
+                    break
+            elif(opcion == "3"):
                 df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Título Responsable"] == "Asesor de Negocios Comerciales")]
                 opcion = input("1: Insertar en db\n2: Crear Excel y .CSV\n")
                 if(opcion == "1"):
                     self.insertPg(df, "COMERCIAL")
                 elif(opcion == "2"):
-                    self.crear_excel(df)
+                    self.crear_excel(df, "Comercial")
                     #self.crear_csv(df)
                 else:
                     break
-            elif(opcion == "3"):
+            elif(opcion == "4"):
                 df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Segmento"] == "CORPORATIVO")]
                 opcion = input("1: Insertar en db\n2: Crear Excel y .CSV\n")
                 if(opcion == "1"):
                     self.insertPg(df, "CORPORATIVO")
                 elif(opcion == "2"):
-                    self.crear_excel(df)
+                    self.crear_excel(df, "Corporativo")
                     #self.crear_csv(df)
                 else:
                     break
-            elif(opcion == "4"):
+            elif(opcion == "5"):
                 df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Segmento"] == "EMPRESA")]
                 opcion = input("1: Insertar en db\n2: Crear Excel y .CSV\n")
                 if(opcion == "1"):
                     self.insertPg(df, "EMPRESA")
                 elif(opcion == "2"):
-                    self.crear_excel(df)
+                    self.crear_excel(df, "Empresa")
                     #self.crear_csv(df)
                 else:
                     break
-            elif(opcion == "5"):
+            elif(opcion == "6"):
                 df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Segmento"] == "INSTITUCIONAL")]
                 opcion = input("1: Insertar en db\n2: Crear Excel y .CSV\n")
                 if(opcion == "1"):
                     self.insertPg(df, "INSTITUCIONAL")
                 elif(opcion == "2"):
-                    self.crear_excel(df)
-                    #self.crear_csv(df)
-                else:
-                    break
-            elif(opcion == "6"):
-                df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Segmento"] == "PERSONAS")]
-                opcion = input("1: Insertar en db\n2: Crear Excel y .CSV\n")
-                if(opcion == "1"):
-                    self.insertPg(df, "PERSONAS")
-                elif(opcion == "2"):
-                    self.crear_excel(df)
+                    self.crear_excel(df, "Institucional")
                     #self.crear_csv(df)
                 else:
                     break
             elif(opcion == "7"):
-                df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Segmento"] == "BANCA PREMIUM")]
+                df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Segmento"] == "PERSONAS") & 
+                                                (self.cargaDatos.cartera.df["Segmento"] == "BANCA PREMIUM")]
                 opcion = input("1: Insertar en db\n2: Crear Excel y .CSV\n")
                 if(opcion == "1"):
-                    self.insertPg(df, "BANCA PREMIUM")
+                    self.insertPg(df, "PERSONAS")
                 elif(opcion == "2"):
-                    self.crear_excel(df)
+                    self.crear_excel(df, "Personas")
                     #self.crear_csv(df)
                 else:
                     break
@@ -253,7 +273,7 @@ class controlador:
                 if(opcion == "1"):
                     self.insertPg(df, "PYME")
                 elif(opcion == "2"):
-                    self.crear_excel(df)
+                    self.crear_excel(df, "Pyme")
                     #self.crear_csv(df)
                 else:
                     break
@@ -263,7 +283,7 @@ class controlador:
                 if(opcion == "1"):
                     self.insertPg(df, "MICROEMPRESARIO POPULAR")
                 elif(opcion == "2"):
-                    self.crear_excel(df)
+                    self.crear_excel(df, "Microempresario Popular")
                     #self.crear_csv(df)
                 else:
                     break
@@ -276,6 +296,6 @@ class controlador:
                 print("Opción incorrecta.")
         
     #Dirección en pc de archivos fuente, dirección de base de datos destino, nombre de la tabla dentro de la cartera clientes y fecha a asignar a cada registro.
-controlador(r'C:\Users\bc221066\Documents\José Prieto\Cross Selling\Insumos\2021\Junio', '30/06/2021').controlador()
+controlador(r'C:\Users\bc221066\Documents\José Prieto\Cross Selling\Insumos\2021\Julio', '30/07/2021').controlador()
 
 #contro = controlador(r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Enero', r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Cross Selling', "Cartera_Clientes_Enero_2020", '29/01/2021').insert_db()

@@ -13,6 +13,7 @@ class cartera_cliente_load:
         self.rutaOrigin = ruta
         for file in gb.glob(ruta + self.nombre_archivo + '*.accdb'):
             self.ruta = file
+        self.df = ""
         
         """try:
             self.conn = pdbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=' + self.ruta)
@@ -25,7 +26,13 @@ class cartera_cliente_load:
             
         try:
             self.conn = pdbc.connect(r'Driver={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=' + self.ruta)
-            self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "Estatus Cliente", "NombreCliente", "MIS Grupo", "Grupo Economico", "Cod Of", "Segmento", "Unidad De Negocio", "Región", "Código de BC", "Nombre completo", "Título", "Tipo de Atención" FROM ' + db + ' WHERE ("Segmento" = ? OR "Segmento" = ? OR "Segmento" = ? OR "Segmento" = ?) AND "Estatus Cliente" = ?', self.conn, params=["BANCA PREMIUM", "PERSONAS", "PYME", "MICROEMPRESARIO POPULAR", "Activo"])
+            opcion = input("1: Todos los activos menos personas y banca premium\n2: Personas y Banca premium y .CSV\n")
+            if (opcion == "1"):
+                self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "Estatus Cliente", "NombreCliente", "MIS Grupo", "Grupo Economico", "Cod Of", "Segmento", "Unidad De Negocio", "Región", "Código de BC", "Nombre completo", "Título", "Tipo de Atención" FROM ' + db + ' WHERE ("Segmento" = ? OR "Segmento" = ? OR "Segmento" = ? OR "Segmento" = ? OR "Segmento" = ? OR "Título" = ?) AND "Estatus Cliente" = ?', self.conn, params=["CORPORATIVO", "EMPRESA", "INSTITUCIONAL", "PYME", "MICROEMPRESARIO POPULAR", "Asesor de Negocios Comerciales", "Activo"])
+            elif (opcion == "2"):
+                self.df = pd.read_sql('SELECT "MisCliente", "CedulaCliente", "Estatus Cliente", "NombreCliente", "MIS Grupo", "Grupo Economico", "Cod Of", "Segmento", "Unidad De Negocio", "Región", "Código de BC", "Nombre completo", "Título", "Tipo de Atención" FROM ' + db + ' WHERE "Estatus Cliente" = ?', self.conn, params=["Activo"])
+            else:
+                print("Opción equivocada.")
         except Exception as err:
             print(err)
             input("Error presione contrl + C")

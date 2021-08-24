@@ -8,7 +8,7 @@ class P2C_Transacciones_load:
     #Constructor
     def __init__(self, ruta, cartera, fecha):
         print("Creando p2c")
-        self.nombre_archivo = '\P2C_'
+        self.nombre_archivo = '\P2C'
         self.rutaOrigin = ruta
         for file in gb.glob(ruta + self.nombre_archivo + '*.xlsx'):
             self.ruta = file
