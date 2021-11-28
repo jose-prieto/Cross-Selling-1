@@ -9,7 +9,7 @@ class cartera_cliente_load:
     #Constructor
     def __init__(self, ruta, db, fecha):
         print("Creando cartera")
-        self.nombre_archivo = '\Base de '
+        self.nombre_archivo = '\Base'
         self.rutaOrigin = ruta
         for file in gb.glob(ruta + self.nombre_archivo + '*.accdb'):
             self.ruta = file

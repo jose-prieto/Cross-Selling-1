@@ -33,7 +33,6 @@ class controlador:
         self.fideicomiso = ""
         
         self.recargar_datos()
-        self.controlador()
         
     def recargar_datos(self):
         self.cargaDatos = cargaDatos(self.ruta, self.fecha, self.db)
@@ -198,8 +197,6 @@ class controlador:
                     self.insertPg(df, "EMPRESA")
                     df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Segmento"] == "INSTITUCIONAL")]
                     self.insertPg(df, "INSTITUCIONAL")
-                    df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Tipo de Atención"] == "Estandar")]
-                    self.insertPg(df, "ESTANDAR")
                 elif(opcion == "2"):
                     df = self.cargaDatos.cartera.df[(self.cargaDatos.cartera.df["Título Responsable"] == "Asesor de Negocios Comerciales")]
                     self.crear_excel(df, "Comercial")
@@ -296,6 +293,6 @@ class controlador:
                 print("Opción incorrecta.")
         
     #Dirección en pc de archivos fuente, dirección de base de datos destino, nombre de la tabla dentro de la cartera clientes y fecha a asignar a cada registro.
-controlador(r'C:\Users\bc221066\Documents\José Prieto\Cross Selling\Insumos\2021\Julio', '30/07/2021').controlador()
+controlador(r'C:\Users\bc221066\Documents\José Prieto\Cross Selling\Insumos\2021\Octubre', '29/10/2021').controlador()
 
 #contro = controlador(r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Enero', r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Cross Selling', "Cartera_Clientes_Enero_2020", '29/01/2021').insert_db()
