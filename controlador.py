@@ -127,7 +127,7 @@ class controlador:
         print("montos luego: ",len(clientes.index))
         print("usables luego: ",len(montos.index))
         
-        writer = pd.ExcelWriter(self.ruta + '\\rchivos csv\Cross-Selling-' + segmento + '-Junio-2021.xlsx')
+        writer = pd.ExcelWriter(self.ruta + '\\rchivos csv\Cross-Selling-' + segmento + '-Noviembre-2021.xlsx')
         clientes.to_excel(writer, sheet_name="CS Clientes", index=False)
         montos.to_excel(writer, sheet_name="Montos por Producto Cliente", index=False)
         writer.save()
@@ -293,6 +293,6 @@ class controlador:
                 print("Opción incorrecta.")
         
     #Dirección en pc de archivos fuente, dirección de base de datos destino, nombre de la tabla dentro de la cartera clientes y fecha a asignar a cada registro.
-controlador(r'C:\Users\bc221066\Documents\José Prieto\Cross Selling\Insumos\2021\Octubre', '29/10/2021').controlador()
+controlador(r'C:\Users\bc221066\Documents\José Prieto\Cross Selling\Insumos\2021\Noviembre', '30/11/2021').controlador()
 
 #contro = controlador(r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Enero', r'C:\Users\bc221066\Documents\José Prieto\Insumos Cross Selling\Cross Selling', "Cartera_Clientes_Enero_2020", '29/01/2021').insert_db()
